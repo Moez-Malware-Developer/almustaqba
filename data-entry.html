@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل بيانات الاختبار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #f0f2ff;
+            --text-color: #2d3748;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            margin: 20px;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #f8fafc;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+            box-shadow: 0 0 0 3px var(--secondary-color);
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn:hover {
+            background-color: #4338ca;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+        }
+        .btn i {
+            font-size: 20px;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تسجيل بيانات الاختبار</h1>
+        <form id="testForm">
+            <div class="form-group">
+                <label for="name">الاسم الكامل</label>
+                <input type="text" id="name" placeholder="أدخل اسمك الثلاثي" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="group">المجموعة</label>
+                <select id="group" required>
+                    <option value="" selected disabled>اختر المجموعة</option>
+                    <option value="group1">المجموعة الأولى</option>
+                    <option value="group2">المجموعة الثانية</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn">
+                <i class="fas fa-play"></i>
+                بدء الاختبار
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // جمع بيانات النموذج
+            const testData = {
+                name: document.getElementById('name').value,
+                group: document.getElementById('group').value
+            };
+            
+            // هنا يمكنك إرسال البيانات للخادم أو حفظها محلياً
+            console.log('بيانات الاختبار:', testData);
+            
+            // حفظ البيانات والتوجيه إلى صفحة الاختبار
+            localStorage.setItem('testData', JSON.stringify(testData));
+            window.location.href = "test.html";
+        });
+    </script>
+</body>
+</html>

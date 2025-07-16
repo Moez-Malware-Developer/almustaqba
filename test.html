@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار صيانة الهواتف</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #f0f2ff;
+            --text-color: #2d3748;
+            --correct-color: #10b981;
+            --incorrect-color: #ef4444;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .question-container {
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+        }
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        .options-container {
+            margin-bottom: 30px;
+        }
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .option:hover {
+            background-color: #f8fafc;
+            border-color: var(--primary-color);
+        }
+        .option.selected {
+            background-color: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+        .option.correct {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: var(--correct-color);
+        }
+        .option.incorrect {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: var(--incorrect-color);
+        }
+        .option input {
+            margin-left: 10px;
+        }
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-color);
+            transition: width 0.3s;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn:hover {
+            background-color: #4338ca;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+        }
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .btn i {
+            font-size: 18px;
+        }
+        .result-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .result-score {
+            font-size: 72px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+        .result-feedback {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        .correct-answers {
+            color: var(--correct-color);
+        }
+        .incorrect-answers {
+            color: var(--incorrect-color);
+        }
+        .question-result {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8fafc;
+        }
+        .question-result.correct {
+            border-left: 5px solid var(--correct-color);
+        }
+        .question-result.incorrect {
+            border-left: 5px solid var(--incorrect-color);
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .question-text {
+                font-size: 18px;
+            }
+            .option {
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>اختبار صيانة الهواتف</h1>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div id="questionsContainer">
+            <!-- Questions will be inserted here by JavaScript -->
+        </div>
+        
+        <div class="navigation">
+            <button id="prevBtn" class="btn" disabled>
+                <i class="fas fa-arrow-right"></i>
+                السابق
+            </button>
+            <button id="nextBtn" class="btn">
+                التالي
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <button id="submitBtn" class="btn" style="display: none;">
+                <i class="fas fa-check"></i>
+                عرض النتيجة
+            </button>
+        </div>
+        
+        <div id="resultContainer" class="result-container">
+            <h2>نتيجة الاختبار</h2>
+            <div class="result-score" id="resultScore">0%</div>
+            <div class="result-feedback" id="resultFeedback"></div>
+            
+            <div id="resultsDetails">
+                <!-- Detailed results will be inserted here -->
+            </div>
+            
+            <button id="restartBtn" class="btn" style="margin-top: 30px;">
+                <i class="fas fa-redo"></i>
+                إعادة الاختبار
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Test questions data
+        const questions = [
+            {
+                question: "جهاز عند تسجيل فيديو لا يوجد صوت",
+                options: ["لاقط صوت علوي", "لاقط صوت سفلي", "اسبكر"],
+                correctAnswer: 1
+            },
+            {
+                question: "مدخل الشفرة يعطي قراءة في رجل واحدة فقط والباقي لا شيء",
+                options: ["يعمل", "لا يعمل"],
+                correctAnswer: 1
+            },
+            {
+                question: "عند الاتصال لا يسمع الشخص الآخر صوتك إلا عند فتح الاسبكر",
+                options: ["لاقط صوت علوي", "لاقط صوت سفلي", "سماعات"],
+                correctAnswer: 1
+            },
+            {
+                question: "بطارية تعطي 2.77 فولت",
+                options: ["تعمل", "لا تعمل", "يمكن إصلاحها"],
+                correctAnswer: 1
+            },
+            {
+                question: "عند فحص الجهاز بالبور سبلاي يعطي قراءة 0.55 - 0.65 أمبير",
+                options: [
+                    "الشاشة تعمل لكن البوردة لا تعمل",
+                    "البوردة تعمل والشاشة لا تعمل",
+                    "البوردة والشاشة تعملان والمشكلة في الفلاتة"
+                ],
+                correctAnswer: 0
+            },
+            {
+                question: "الهاتف لا يصدر صوت عند الرنين ولكن يعمل عند توصيل السماعات",
+                options: ["اسبكر تالف", "الهزاز تالف", "لاقط صوت علوي تالف"],
+                correctAnswer: 0
+            },
+            {
+                question: "الهزاز لا يعمل عند استقبال المكالمات",
+                options: ["الهزاز تالف", "الأرجل غير موصلة", "البطارية ضعيفة"],
+                correctAnswer: 0
+            },
+            {
+                question: "عند توصيل الشاحن تظهر علامة الشحن لكن لا يتم شحن البطارية",
+                options: ["مدخل الشحن تالف", "الأرجل مفصولة", "الشاحن تالف"],
+                correctAnswer: 0
+            },
+            {
+                question: "الهاتف يعطي صوت منخفض جداً عند تشغيل الفيديوهات",
+                options: ["اسبكر تالف", "وجود غبار في الاسبكر", "لاقط صوت علوي تالف"],
+                correctAnswer: 1
+            },
+            {
+                question: "مدخل الشفرة لا يتعرف على الشريحة إطلاقاً",
+                options: ["مدخل الشفرة تالف", "الأرجل مفصولة", "الشريحة منزلقه"],
+                correctAnswer: 0
+            }
+        ];
+
+        // DOM elements
+        const questionsContainer = document.getElementById('questionsContainer');
+        const progressBar = document.getElementById('progressBar');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultScore = document.getElementById('resultScore');
+        const resultFeedback = document.getElementById('resultFeedback');
+        const resultsDetails = document.getElementById('resultsDetails');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // Test state
+        let currentQuestion = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let testSubmitted = false;
+
+        // Initialize the test
+        function initTest() {
+            // Create question elements
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = `question-container ${index === 0 ? 'active' : ''}`;
+                questionDiv.dataset.index = index;
+                
+                const questionText = document.createElement('div');
+                questionText.className = 'question-text';
+                questionText.textContent = `${index + 1}. ${q.question}`;
+                questionDiv.appendChild(questionText);
+                
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'options-container';
+                
+                q.options.forEach((option, optIndex) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.dataset.optionIndex = optIndex;
+                    
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.name = `question-${index}`;
+                    optionInput.id = `question-${index}-option-${optIndex}`;
+                    optionInput.value = optIndex;
+                    
+                    const optionLabel = document.createElement('label');
+                    optionLabel.htmlFor = `question-${index}-option-${optIndex}`;
+                    optionLabel.textContent = option;
+                    
+                    optionDiv.appendChild(optionInput);
+                    optionDiv.appendChild(optionLabel);
+                    
+                    optionDiv.addEventListener('click', () => {
+                        if (!testSubmitted) {
+                            selectOption(index, optIndex);
+                        }
+                    });
+                    
+                    optionsContainer.appendChild(optionDiv);
+                });
+                
+                questionDiv.appendChild(optionsContainer);
+                questionsContainer.appendChild(questionDiv);
+            });
+            
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Select an option for a question
+        function selectOption(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            
+            // Update UI
+            const questionDiv = document.querySelector(`.question-container[data-index="${questionIndex}"]`);
+            questionDiv.querySelectorAll('.option').forEach((opt, idx) => {
+                opt.classList.toggle('selected', idx === optionIndex);
+            });
+            
+            updateNavigationButtons();
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Update navigation buttons state
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestion === 0;
+            
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'flex';
+                submitBtn.disabled = userAnswers[currentQuestion] === null;
+            } else {
+                nextBtn.style.display = 'flex';
+                submitBtn.style.display = 'none';
+                nextBtn.disabled = userAnswers[currentQuestion] === null;
+            }
+        }
+
+        // Show a specific question
+        function showQuestion(index) {
+            document.querySelectorAll('.question-container').forEach((q, i) => {
+                q.classList.toggle('active', i === index);
+            });
+            
+            currentQuestion = index;
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Show next question
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                showQuestion(currentQuestion + 1);
+            }
+        }
+
+        // Show previous question
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                showQuestion(currentQuestion - 1);
+            }
+        }
+
+        // Submit the test and show results
+        function submitTest() {
+            testSubmitted = true;
+            
+            // Calculate score
+            let correctCount = 0;
+            questions.forEach((q, index) => {
+                if (userAnswers[index] === q.correctAnswer) {
+                    correctCount++;
+                }
+            });
+            
+            const score = Math.round((correctCount / questions.length) * 100);
+            
+            // Display results
+            resultScore.textContent = `${score}%`;
+            
+            if (score >= 80) {
+                resultFeedback.textContent = "ممتاز! لديك معرفة ممتازة في صيانة الهواتف";
+            } else if (score >= 60) {
+                resultFeedback.textContent = "جيد جداً! لديك فهم جيد لأساسيات صيانة الهواتف";
+            } else if (score >= 40) {
+                resultFeedback.textContent = "ليس سيئاً! يمكنك تحسين معرفتك بالمزيد من الدراسة";
+            } else {
+                resultFeedback.textContent = "تحتاج إلى مزيد من التعلم في مجال صيانة الهواتف";
+            }
+            
+            // Show detailed results
+            resultsDetails.innerHTML = '';
+            questions.forEach((q, index) => {
+                const isCorrect = userAnswers[index] === q.correctAnswer;
+                const questionResult = document.createElement('div');
+                questionResult.className = `question-result ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                const questionText = document.createElement('div');
+                questionText.style.fontWeight = 'bold';
+                questionText.textContent = `${index + 1}. ${q.question}`;
+                questionResult.appendChild(questionText);
+                
+                const userAnswerText = document.createElement('div');
+                userAnswerText.textContent = `إجابتك: ${q.options[userAnswers[index]] || 'لم تجب'}`;
+                questionResult.appendChild(userAnswerText);
+                
+                const correctAnswerText = document.createElement('div');
+                correctAnswerText.textContent = `الإجابة الصحيحة: ${q.options[q.correctAnswer]}`;
+                questionResult.appendChild(correctAnswerText);
+                
+                resultsDetails.appendChild(questionResult);
+            });
+            
+            // Hide questions and show results
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.style.display = 'none';
+            });
+            document.querySelector('.progress-container').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            // Highlight correct/incorrect answers in questions
+            questions.forEach((q, qIndex) => {
+                const questionDiv = document.querySelector(`.question-container[data-index="${qIndex}"]`);
+                questionDiv.querySelectorAll('.option').forEach((opt, optIndex) => {
+                    if (optIndex === q.correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (optIndex === userAnswers[qIndex] && userAnswers[qIndex] !== q.correctAnswer) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+            });
+        }
+
+        // Restart the test
+        function restartTest() {
+            // Reset state
+            currentQuestion = 0;
+            userAnswers = Array(questions.length).fill(null);
+            testSubmitted = false;
+            
+            // Reset UI
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.style.display = 'block';
+                q.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('selected', 'correct', 'incorrect');
+                });
+            });
+            
+            document.querySelector('.progress-container').style.display = 'block';
+            document.querySelector('.navigation').style.display = 'flex';
+            resultContainer.style.display = 'none';
+            
+            showQuestion(0);
+            updateNavigationButtons();
+        }
+
+        // Event listeners
+        nextBtn.addEventListener('click', nextQuestion);
+        prevBtn.addEventListener('click', prevQuestion);
+        submitBtn.addEventListener('click', submitTest);
+        restartBtn.addEventListener('click', restartTest);
+
+        // Initialize the test
+        initTest();
+    </script>
+</body>
+</html>
