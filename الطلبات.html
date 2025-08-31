@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إدارة الطلبات - VELO Velocity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { 
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #045482;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #056a9e;
+        }
+        .main-button {
+            background-color: #045482;
+            transition: all 0.2s ease;
+        }
+        .main-button:hover {
+            background-color: #056a9e;
+        }
+        .accent-color {
+            color: #EB630A;
+        }
+        .border-accent {
+            border-color: #EB630A;
+        }
+        .ring-accent {
+            --tw-ring-color: #f7a972;
+        }
+
+        /* الطباعة */
+        @media print {
+            body > *:not(.print-section):not(#invoiceTemplate) {
+                display: none !important;
+            }
+            #invoiceTemplate {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+   <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6">
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#056a9e] pb-4">VELO Velocity</h1>
+            <nav class="space-y-3">
+                <a href="الرئسيه.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-home text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="الطلبات.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#EB630A] text-[#045482] font-semibold sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الطلبات</span>
+                </a>
+                <a href="المناديب.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-truck text-lg"></i>
+                    <span>إدارة المندوبين</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-users text-lg"></i>
+                    <span>العملاء</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-chart-bar text-lg"></i>
+                    <span>التقارير</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+    <button id="menuBtn" class="fixed top-4 right-4 z-50 p-3 bg-[#045482] text-white rounded-lg shadow-lg lg:hidden">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+    
+    <main class="flex-1 p-4 md:p-8">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                <i class="fas fa-boxes accent-color"></i>
+                <span>إدارة الطلبات</span>
+            </h1>
+            <p class="text-gray-500 mb-6">يمكنك هنا إضافة، عرض، وتعديل جميع طلبات التوصيل.</p>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 no-print">
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <label for="filterDate" class="font-medium text-gray-700">تاريخ الطلبات:</label>
+                    <input type="date" id="filterDate" class="w-full md:w-48 px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" />
+                </div>
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="searchInput" placeholder="بحث بالاسم أو الرقم أو الكود..." class="w-full pl-12 pr-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" />
+                    <i class="fas fa-search text-gray-400 absolute right-4 top-1/2 -translate-y-1/2"></i>
+                </div>
+                <button id="printAllBtn" class="text-white px-6 py-2 rounded-lg main-button flex items-center gap-2 shadow-sm whitespace-nowrap">
+                    <i class="fas fa-print"></i>
+                    <span>طباعة القائمة</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto bg-gray-50 rounded-lg shadow-inner border border-gray-200">
+                <table class="min-w-full text-right divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 font-semibold text-gray-700">كود الطلب</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">اسم العميل</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">رقم الهاتف</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">المدينة</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">القيمة (د.ل)</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">المندوب</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div id="noOrdersMessage" class="text-center text-gray-500 py-8 hidden">
+                <p>لا توجد طلبات لعرضها لهذا اليوم. ابدأ بإضافة طلب جديد! 🚀</p>
+            </div>
+            
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 no-print">
+            <h2 id="formTitle" class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-plus-circle accent-color"></i>
+                <span>إضافة طلب جديد</span>
+            </h2>
+            <form id="orderForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                    <label for="orderCode" class="block text-gray-700 font-medium mb-1">كود الطلب <span class="text-red-500">*</span></label>
+                    <input type="text" id="orderCode" name="orderCode" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" />
+                </div>
+                <div>
+                    <label for="customerName" class="block text-gray-700 font-medium mb-1">اسم العميل <span class="text-red-500">*</span></label>
+                    <input type="text" id="customerName" name="customerName" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" />
+                </div>
+                <div>
+                    <label for="customerPhone" class="block text-gray-700 font-medium mb-1">رقم الهاتف <span class="text-red-500">*</span></label>
+                    <input type="tel" id="customerPhone" name="customerPhone" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" dir="ltr" />
+                </div>
+                <div>
+                    <label for="city" class="block text-gray-700 font-medium mb-1">المدينة</label>
+                    <select id="city" name="city" class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition">
+                        <option value="">اختر المدينة</option>
+                        <option value="طرابلس">طرابلس</option>
+                        <option value="بنغازي">بنغازي</option>
+                        <option value="مصراتة">مصراتة</option>
+                        <option value="سبها">سبها</option>
+                        <option value="الزاوية">الزاوية</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="orderValue" class="block text-gray-700 font-medium mb-1">قيمة الطلب (د.ل) <span class="text-red-500">*</span></label>
+                    <input type="number" id="orderValue" name="orderValue" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" min="0" dir="ltr" />
+                </div>
+                <div>
+                    <label for="delegate" class="block text-gray-700 font-medium mb-1">المندوب</label>
+                    <select id="delegate" name="delegate" class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition">
+                        <option value="">اختر المندوب</option>
+                        <option value="أحمد محمد">أحمد محمد</option>
+                        <option value="فاطمة علي">فاطمة علي</option>
+                        <option value="محمود عبد الله">محمود عبد الله</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2 lg:col-span-3 mt-4 flex gap-4">
+                    <button type="submit" class="text-white px-6 py-2 rounded-lg main-button flex items-center gap-2 shadow-md">
+                        <i class="fas fa-plus"></i>
+                        <span id="submitButtonText">إضافة طلب</span>
+                    </button>
+                    <button type="button" id="cancelEditBtn" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition hidden">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+    </main>
+
+    <div id="invoiceTemplate" class="print-section hidden bg-white shadow-xl rounded-lg p-8 mx-auto my-8 max-w-2xl">
+        <div class="flex justify-between items-center mb-6 border-b-2 pb-4 border-gray-200">
+            <div class="text-right">
+                <h1 class="text-2xl font-bold text-gray-800">فاتورة طلب</h1>
+                <p id="invoiceNumber" class="text-sm text-gray-600 mt-1">رقم الفاتورة: </p>
+                <p id="invoiceDate" class="text-sm text-gray-600">التاريخ: </p>
+            </div>
+            <div class="text-left">
+                <h2 class="text-2xl font-bold accent-color">VELO Velocity</h2>
+                <p class="text-sm text-gray-500">هاتف: 0911234567</p>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">تفاصيل العميل</h3>
+            <div class="grid grid-cols-2 gap-4 text-gray-600">
+                <p><strong>الاسم:</strong> <span id="invoiceCustomer"></span></p>
+                <p><strong>الهاتف:</strong> <span id="invoicePhone"></span></p>
+                <p><strong>المدينة:</strong> <span id="invoiceCity"></span></p>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">تفاصيل الطلب</h3>
+            <table class="w-full text-right border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="p-2 border border-gray-300">الوصف</th>
+                        <th class="p-2 border border-gray-300 text-center">القيمة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="p-2 border border-gray-300">قيمة الطلب</td>
+                        <td class="p-2 border border-gray-300 text-center" id="invoiceValue"></td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 border border-gray-300">المندوب</td>
+                        <td class="p-2 border border-gray-300 text-center" id="invoiceDelegate"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="text-center text-gray-500 text-sm mt-8 border-t pt-4 border-gray-200">
+            <p>شكراً لتعاملكم معنا. هذه الفاتورة لا تحتاج إلى ختم.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const orders = [
+                { id: 1, code: 'ORD-001', customer: 'علي عبد السلام', phone: '0912345678', city: 'طرابلس', value: 150.00, delegate: 'أحمد محمد', status: 'مكتمل', date: '2025-08-31' },
+                { id: 2, code: 'ORD-002', customer: 'محمد فرج', phone: '0928765432', city: 'بنغازي', value: 230.50, delegate: 'فاطمة علي', status: 'قيد التوصيل', date: '2025-08-30' },
+                { id: 3, code: 'ORD-003', customer: 'سالمة عبد الله', phone: '0941112233', city: 'مصراتة', value: 75.00, delegate: 'محمود عبد الله', status: 'ملغي', date: '2025-08-31' },
+                { id: 4, code: 'ORD-004', customer: 'خالد مصطفى', phone: '0915556677', city: 'طرابلس', value: 300.00, delegate: 'أحمد محمد', status: 'مكتمل', date: '2025-08-31' },
+                { id: 5, code: 'ORD-005', customer: 'ليلى سالم', phone: '0929998877', city: 'بنغازي', value: 95.00, delegate: 'فاطمة علي', status: 'قيد التوصيل', date: '2025-08-29' }
+            ];
+
+            const ordersTableBody = document.getElementById('ordersTableBody');
+            const filterDateInput = document.getElementById('filterDate');
+            const searchInput = document.getElementById('searchInput');
+            const orderForm = document.getElementById('orderForm');
+            const noOrdersMessage = document.getElementById('noOrdersMessage');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+
+            let editingOrderId = null;
+
+            // Sidebar toggle for mobile
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+            
+            // تعيين التاريخ الافتراضي
+            const today = new Date().toISOString().split('T')[0];
+            filterDateInput.value = today;
+
+            const renderOrders = (filteredOrders) => {
+                ordersTableBody.innerHTML = '';
+                if (filteredOrders.length === 0) {
+                    noOrdersMessage.classList.remove('hidden');
+                } else {
+                    noOrdersMessage.classList.add('hidden');
+                    filteredOrders.forEach(order => {
+                        const statusClass = order.status === 'مكتمل' ? 'bg-green-100 text-green-800' :
+                                             order.status === 'قيد التوصيل' ? 'bg-yellow-100 text-yellow-800' :
+                                             'bg-red-100 text-red-800';
+                        const row = `
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${order.code}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.customer}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700" dir="ltr">${order.phone}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.city}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700" dir="ltr">${order.value.toFixed(2)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.delegate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${order.status}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap no-print">
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="printInvoice('${order.code}')" class="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-full transition" title="طباعة">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                        <button onclick="editOrder(${order.id})" class="p-1.5 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full transition" title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteOrder(${order.id})" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition" title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        ordersTableBody.innerHTML += row;
+                    });
+                }
+            };
+
+            const filterAndSearch = () => {
+                const dateFilter = filterDateInput.value;
+                const searchTerm = searchInput.value.toLowerCase();
+
+                const filteredOrders = orders.filter(order => {
+                    const matchesDate = order.date === dateFilter;
+                    const matchesSearch = searchTerm === '' || 
+                                          order.code.toLowerCase().includes(searchTerm) ||
+                                          order.customer.toLowerCase().includes(searchTerm) ||
+                                          order.phone.includes(searchTerm);
+                    return matchesDate && matchesSearch;
+                });
+                renderOrders(filteredOrders);
+            };
+
+            filterDateInput.addEventListener('change', filterAndSearch);
+            searchInput.addEventListener('input', filterAndSearch);
+
+            orderForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newOrder = {
+                    id: editingOrderId || Date.now(),
+                    code: document.getElementById('orderCode').value,
+                    customer: document.getElementById('customerName').value,
+                    phone: document.getElementById('customerPhone').value,
+                    city: document.getElementById('city').value,
+                    value: parseFloat(document.getElementById('orderValue').value),
+                    delegate: document.getElementById('delegate').value,
+                    status: 'قيد التوصيل',
+                    date: today
+                };
+                
+                if (editingOrderId) {
+                    const index = orders.findIndex(o => o.id === editingOrderId);
+                    if (index !== -1) {
+                        orders[index] = newOrder;
+                    }
+                    editingOrderId = null;
+                    document.getElementById('formTitle').textContent = 'إضافة طلب جديد';
+                    document.getElementById('submitButtonText').textContent = 'إضافة طلب';
+                    document.getElementById('cancelEditBtn').classList.add('hidden');
+                } else {
+                    orders.push(newOrder);
+                }
+
+                orderForm.reset();
+                filterAndSearch();
+            });
+
+            window.editOrder = (id) => {
+                const orderToEdit = orders.find(o => o.id === id);
+                if (orderToEdit) {
+                    editingOrderId = id;
+                    document.getElementById('orderCode').value = orderToEdit.code;
+                    document.getElementById('customerName').value = orderToEdit.customer;
+                    document.getElementById('customerPhone').value = orderToEdit.phone;
+                    document.getElementById('city').value = orderToEdit.city;
+                    document.getElementById('orderValue').value = orderToEdit.value;
+                    document.getElementById('delegate').value = orderToEdit.delegate;
+
+                    document.getElementById('formTitle').textContent = `تعديل الطلب ${orderToEdit.code}`;
+                    document.getElementById('submitButtonText').textContent = 'حفظ التعديلات';
+                    document.getElementById('cancelEditBtn').classList.remove('hidden');
+                    window.scrollTo({ top: orderForm.offsetTop, behavior: 'smooth' });
+                }
+            };
+
+            document.getElementById('cancelEditBtn').addEventListener('click', () => {
+                editingOrderId = null;
+                orderForm.reset();
+                document.getElementById('formTitle').textContent = 'إضافة طلب جديد';
+                document.getElementById('submitButtonText').textContent = 'إضافة طلب';
+                document.getElementById('cancelEditBtn').classList.add('hidden');
+            });
+
+            window.deleteOrder = (id) => {
+                if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+                    const index = orders.findIndex(o => o.id === id);
+                    if (index !== -1) {
+                        orders.splice(index, 1);
+                        filterAndSearch();
+                    }
+                }
+            };
+
+            window.printInvoice = (code) => {
+                const order = orders.find(o => o.code === code);
+                if (order) {
+                    document.getElementById('invoiceNumber').textContent = `رقم الفاتورة: ${order.code}`;
+                    document.getElementById('invoiceDate').textContent = `التاريخ: ${order.date}`;
+                    document.getElementById('invoiceCustomer').textContent = order.customer;
+                    document.getElementById('invoicePhone').textContent = order.phone;
+                    document.getElementById('invoiceCity').textContent = order.city;
+                    document.getElementById('invoiceValue').textContent = `${order.value.toFixed(2)} د.ل`;
+                    document.getElementById('invoiceDelegate').textContent = order.delegate;
+                    
+                    window.print();
+                }
+            };
+
+            document.getElementById('printAllBtn').addEventListener('click', () => {
+                window.print();
+            });
+
+            filterAndSearch();
+        });
+    </script>
+</body>
+</html>
