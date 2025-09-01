@@ -6,13 +6,13 @@
     <title>إدارة الطلبات - VELO Velocity</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body { 
             font-family: 'Tajawal', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f0f4f8;
         }
-
         #sidebar {
             transition: transform 0.3s ease-in-out;
             background-color: #045482;
@@ -41,44 +41,65 @@
         .accent-color {
             color: #EB630A;
         }
-        .border-accent {
-            border-color: #EB630A;
+        .bg-accent {
+            background-color: #EB630A;
         }
         .ring-accent {
             --tw-ring-color: #f7a972;
         }
+        .status-pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-in-stock { background-color: #e0f2fe; color: #0369a1; }
+        .status-on-delivery { background-color: #cffafe; color: #0891b2; }
+        .status-delivered { background-color: #d1fae5; color: #065f46; }
+        .status-returned { background-color: #fef9c3; color: #854d0e; }
+        .status-canceled { background-color: #fee2e2; color: #991b1b; }
 
-        /* الطباعة */
+        /* Print styles */
         @media print {
-            body > *:not(.print-section):not(#invoiceTemplate) {
+            body > *:not(.print-table-section) {
                 display: none !important;
             }
-            #invoiceTemplate {
+            .print-table-section {
                 display: block !important;
                 position: absolute;
-                left: 0;
                 top: 0;
+                right: 0;
+                left: 0;
                 width: 100%;
                 box-shadow: none;
-                border-radius: 0;
+                border: none;
+                padding: 1rem;
             }
-            .no-print {
+            .print-table-section .no-print {
                 display: none !important;
+            }
+            .print-table-section table {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-   <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+    <button id="menuBtn" class="fixed top-4 right-4 z-50 p-3 bg-[#045482] text-white rounded-lg shadow-lg lg:hidden">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
         <div class="p-6">
             <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#056a9e] pb-4">VELO Velocity</h1>
             <nav class="space-y-3">
-                <a href="الرئسيه.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                <a href="الرئسيه.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#EB630A] text-[#045482] font-semibold sidebar-link">
                     <i class="fas fa-home text-lg"></i>
                     <span>الرئيسية</span>
                 </a>
-                <a href="الطلبات.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#EB630A] text-[#045482] font-semibold sidebar-link">
+                <a href="الطلبات.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
                     <i class="fas fa-boxes text-lg"></i>
                     <span>إدارة الطلبات</span>
                 </a>
@@ -90,11 +111,11 @@
                     <i class="fas fa-users text-lg"></i>
                     <span>العملاء</span>
                 </a>
-                <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                <a href="البيانات.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
                     <i class="fas fa-chart-bar text-lg"></i>
                     <span>التقارير</span>
                 </a>
-                <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                <a href="settings.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
                     <i class="fas fa-cog text-lg"></i>
                     <span>الإعدادات</span>
                 </a>
@@ -105,10 +126,7 @@
             </nav>
         </div>
     </aside>
-    <button id="menuBtn" class="fixed top-4 right-4 z-50 p-3 bg-[#045482] text-white rounded-lg shadow-lg lg:hidden">
-        <i class="fas fa-bars text-xl"></i>
-    </button>
-    
+
     <main class="flex-1 p-4 md:p-8">
         <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
             <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
@@ -132,27 +150,117 @@
                 </button>
             </div>
 
-            <div class="overflow-x-auto bg-gray-50 rounded-lg shadow-inner border border-gray-200">
-                <table class="min-w-full text-right divide-y divide-gray-200">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-6 py-3 font-semibold text-gray-700">كود الطلب</th>
-                            <th class="px-6 py-3 font-semibold text-gray-700">اسم العميل</th>
-                            <th class="px-6 py-3 font-semibold text-gray-700">رقم الهاتف</th>
-                            <th class="px-6 py-3 font-semibold text-gray-700">المدينة</th>
-                            <th class="px-6 py-3 font-semibold text-gray-700">القيمة (د.ل)</th>
-                            <th class="px-6 py-3 font-semibold text-gray-700">المندوب</th>
-                            <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
-                            <th class="px-6 py-3 font-semibold text-gray-700 no-print">إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody" class="bg-white divide-y divide-gray-200">
-                        </tbody>
-                </table>
+            <div class="bg-gray-50 rounded-lg shadow-inner border border-gray-200 mb-8 print-table-section">
+                <h2 class="text-xl font-bold p-4 bg-gray-100 border-b border-gray-200">الطلبات في المخزن</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-gray-700">كود الطلب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">اسم العميل</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المدينة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">القيمة الإجمالية (د.ل)</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700 no-print">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-in-stock-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                <div id="noInStockOrdersMessage" class="text-center text-gray-500 py-4 hidden">
+                    <p>لا توجد طلبات في المخزن.</p>
+                </div>
             </div>
-            
-            <div id="noOrdersMessage" class="text-center text-gray-500 py-8 hidden">
-                <p>لا توجد طلبات لعرضها لهذا اليوم. ابدأ بإضافة طلب جديد! 🚀</p>
+
+            <div class="bg-gray-50 rounded-lg shadow-inner border border-gray-200 mb-8 print-table-section">
+                <h2 class="text-xl font-bold p-4 bg-gray-100 border-b border-gray-200">الطلبات قيد التوصيل</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-gray-700">كود الطلب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">اسم العميل</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المندوب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المدينة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">القيمة الإجمالية (د.ل)</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700 no-print">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-on-delivery-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                <div id="noOnDeliveryOrdersMessage" class="text-center text-gray-500 py-4 hidden">
+                    <p>لا توجد طلبات قيد التوصيل حالياً.</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg shadow-inner border border-gray-200 mb-8 print-table-section">
+                <h2 class="text-xl font-bold p-4 bg-gray-100 border-b border-gray-200">الطلبات التي تم تسليمها</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-gray-700">كود الطلب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">اسم العميل</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المندوب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المدينة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">القيمة الإجمالية (د.ل)</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700 no-print">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="delivered-orders-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                <div id="noDeliveredOrdersMessage" class="text-center text-gray-500 py-4 hidden">
+                    <p>لا توجد طلبات تم تسليمها اليوم.</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg shadow-inner border border-gray-200 mb-8 print-table-section">
+                <h2 class="text-xl font-bold p-4 bg-gray-100 border-b border-gray-200">الطلبات المرتجعة</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-gray-700">كود الطلب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">اسم العميل</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المندوب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المدينة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">القيمة الإجمالية (د.ل)</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700 no-print">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="returned-orders-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                <div id="noReturnedOrdersMessage" class="text-center text-gray-500 py-4 hidden">
+                    <p>لا توجد طلبات مرتجعة.</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg shadow-inner border border-gray-200 mb-8 print-table-section">
+                <h2 class="text-xl font-bold p-4 bg-gray-100 border-b border-gray-200">الطلبات الملغاة</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-gray-700">كود الطلب</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">اسم العميل</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">المدينة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">القيمة الإجمالية (د.ل)</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700 no-print">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="canceled-orders-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                <div id="noCanceledOrdersMessage" class="text-center text-gray-500 py-4 hidden">
+                    <p>لا توجد طلبات ملغاة.</p>
+                </div>
             </div>
             
         </div>
@@ -176,27 +284,42 @@
                     <input type="tel" id="customerPhone" name="customerPhone" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" dir="ltr" />
                 </div>
                 <div>
-                    <label for="city" class="block text-gray-700 font-medium mb-1">المدينة</label>
-                    <select id="city" name="city" class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition">
-                        <option value="">اختر المدينة</option>
-                        <option value="طرابلس">طرابلس</option>
-                        <option value="بنغازي">بنغازي</option>
-                        <option value="مصراتة">مصراتة</option>
-                        <option value="سبها">سبها</option>
-                        <option value="الزاوية">الزاوية</option>
+                    <label for="region" class="block text-gray-700 font-medium mb-1">المنطقة</label>
+                    <select id="region" name="region" class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition">
+                        <option value="">اختر المنطقة</option>
+                        <option value="المنطقة الجنوبية">المنطقة الجنوبية</option>
+                        <option value="الجبل وباطن الجبل">الجبل وباطن الجبل</option>
+                        <option value="الهلال الأول">الهلال الأول</option>
+                        <option value="الهلال الثاني">الهلال الثاني</option>
+                        <option value="الهلال الثالث">الهلال الثالث</option>
+                        <option value="المنطقة الوسطى">المنطقة الوسطى</option>
+                        <option value="المنطقة الغربية">المنطقة الغربية</option>
+                        <option value="المنطقة الشرقية">المنطقة الشرقية</option>
+                        <option value="مناطق مختلفة">مناطق مختلفة</option>
                     </select>
+                </div>
+                <div>
+                    <label for="city" class="block text-gray-700 font-medium mb-1">المدينة</label>
+                    <select id="city" name="city" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition">
+                        <option value="">اختر المدينة</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="deliveryFee" class="block text-gray-700 font-medium mb-1">رسوم التوصيل (د.ل) <span class="text-red-500">*</span></label>
+                    <input type="number" id="deliveryFee" name="deliveryFee" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" min="0" dir="ltr" value="0" readonly />
                 </div>
                 <div>
                     <label for="orderValue" class="block text-gray-700 font-medium mb-1">قيمة الطلب (د.ل) <span class="text-red-500">*</span></label>
                     <input type="number" id="orderValue" name="orderValue" required class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" min="0" dir="ltr" />
                 </div>
                 <div>
+                    <label for="totalValue" class="block text-gray-700 font-medium mb-1">القيمة الإجمالية (د.ل)</label>
+                    <input type="text" id="totalValue" name="totalValue" class="w-full px-4 py-2 border rounded-lg bg-gray-100 border-gray-300" readonly dir="ltr" />
+                </div>
+                <div>
                     <label for="delegate" class="block text-gray-700 font-medium mb-1">المندوب</label>
                     <select id="delegate" name="delegate" class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition">
                         <option value="">اختر المندوب</option>
-                        <option value="أحمد محمد">أحمد محمد</option>
-                        <option value="فاطمة علي">فاطمة علي</option>
-                        <option value="محمود عبد الله">محمود عبد الله</option>
                     </select>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3 mt-4 flex gap-4">
@@ -211,131 +334,300 @@
             </form>
         </div>
         
+        <div id="invoiceTemplate" class="print-section hidden bg-white shadow-xl rounded-lg p-8 mx-auto my-8 max-w-2xl">
+            <div class="flex justify-between items-center mb-6 border-b-2 pb-4 border-gray-200">
+                <div class="text-right">
+                    <h1 class="text-2xl font-bold text-gray-800">فاتورة طلب</h1>
+                    <p id="invoiceNumber" class="text-sm text-gray-600 mt-1">رقم الفاتورة: </p>
+                    <p id="invoiceDate" class="text-sm text-gray-600">التاريخ: </p>
+                </div>
+                <div class="text-left">
+                    <h2 class="text-2xl font-bold accent-color">VELO Velocity</h2>
+                    <p class="text-sm text-gray-500">هاتف: 0911234567</p>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">تفاصيل العميل</h3>
+                <div class="grid grid-cols-2 gap-4 text-gray-600">
+                    <p><strong>الاسم:</strong> <span id="invoiceCustomer"></span></p>
+                    <p><strong>الهاتف:</strong> <span id="invoicePhone"></span></p>
+                    <p><strong>المنطقة:</strong> <span id="invoiceRegion"></span></p>
+                    <p><strong>المدينة:</strong> <span id="invoiceCity"></span></p>
+                </div>
+            </div>
+            
+            <hr class="my-6 border-gray-300">
+
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">تفاصيل الطلب</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="p-2 border border-gray-300 font-bold">الوصف</th>
+                                <th class="p-2 border border-gray-300 text-center font-bold">القيمة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="p-2 border border-gray-300">قيمة الطلب</td>
+                                <td class="p-2 border border-gray-300 text-center" id="invoiceOrderValue"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 border border-gray-300">رسوم التوصيل</td>
+                                <td class="p-2 border border-gray-300 text-center" id="invoiceDeliveryFee"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 border border-gray-300 font-bold">الإجمالي</td>
+                                <td class="p-2 border border-gray-300 text-center font-bold text-lg" id="invoiceTotalValue"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <hr class="my-6 border-gray-300">
+
+            <div class="text-center text-gray-500 text-sm mt-8">
+                <p>شكراً لتعاملكم معنا. هذه الفاتورة لا تحتاج إلى ختم.</p>
+            </div>
+        </div>
+        
     </main>
 
-    <div id="invoiceTemplate" class="print-section hidden bg-white shadow-xl rounded-lg p-8 mx-auto my-8 max-w-2xl">
-        <div class="flex justify-between items-center mb-6 border-b-2 pb-4 border-gray-200">
-            <div class="text-right">
-                <h1 class="text-2xl font-bold text-gray-800">فاتورة طلب</h1>
-                <p id="invoiceNumber" class="text-sm text-gray-600 mt-1">رقم الفاتورة: </p>
-                <p id="invoiceDate" class="text-sm text-gray-600">التاريخ: </p>
-            </div>
-            <div class="text-left">
-                <h2 class="text-2xl font-bold accent-color">VELO Velocity</h2>
-                <p class="text-sm text-gray-500">هاتف: 0911234567</p>
-            </div>
-        </div>
-        
-        <div class="mb-6">
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">تفاصيل العميل</h3>
-            <div class="grid grid-cols-2 gap-4 text-gray-600">
-                <p><strong>الاسم:</strong> <span id="invoiceCustomer"></span></p>
-                <p><strong>الهاتف:</strong> <span id="invoicePhone"></span></p>
-                <p><strong>المدينة:</strong> <span id="invoiceCity"></span></p>
-            </div>
-        </div>
-        
-        <div class="mb-6">
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">تفاصيل الطلب</h3>
-            <table class="w-full text-right border-collapse">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="p-2 border border-gray-300">الوصف</th>
-                        <th class="p-2 border border-gray-300 text-center">القيمة</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="p-2 border border-gray-300">قيمة الطلب</td>
-                        <td class="p-2 border border-gray-300 text-center" id="invoiceValue"></td>
-                    </tr>
-                    <tr>
-                        <td class="p-2 border border-gray-300">المندوب</td>
-                        <td class="p-2 border border-gray-300 text-center" id="invoiceDelegate"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="text-center text-gray-500 text-sm mt-8 border-t pt-4 border-gray-200">
-            <p>شكراً لتعاملكم معنا. هذه الفاتورة لا تحتاج إلى ختم.</p>
-        </div>
-    </div>
-    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const orders = [
-                { id: 1, code: 'ORD-001', customer: 'علي عبد السلام', phone: '0912345678', city: 'طرابلس', value: 150.00, delegate: 'أحمد محمد', status: 'مكتمل', date: '2025-08-31' },
-                { id: 2, code: 'ORD-002', customer: 'محمد فرج', phone: '0928765432', city: 'بنغازي', value: 230.50, delegate: 'فاطمة علي', status: 'قيد التوصيل', date: '2025-08-30' },
-                { id: 3, code: 'ORD-003', customer: 'سالمة عبد الله', phone: '0941112233', city: 'مصراتة', value: 75.00, delegate: 'محمود عبد الله', status: 'ملغي', date: '2025-08-31' },
-                { id: 4, code: 'ORD-004', customer: 'خالد مصطفى', phone: '0915556677', city: 'طرابلس', value: 300.00, delegate: 'أحمد محمد', status: 'مكتمل', date: '2025-08-31' },
-                { id: 5, code: 'ORD-005', customer: 'ليلى سالم', phone: '0929998877', city: 'بنغازي', value: 95.00, delegate: 'فاطمة علي', status: 'قيد التوصيل', date: '2025-08-29' }
+                { id: 1, code: 'ORD-001', customer: 'علي عبد السلام', phone: '0912345678', region: 'المنطقة الشرقية', city: 'شحات', deliveryFee: 30.00, value: 150.00, totalValue: 180.00, delegate: 'أحمد محمد', status: 'delivered', date: '2025-08-31' },
+                { id: 2, code: 'ORD-002', customer: 'محمد فرج', phone: '0928765432', region: 'المنطقة الشرقية', city: 'البيضاء', deliveryFee: 30.00, value: 230.50, totalValue: 260.50, delegate: 'فاطمة علي', status: 'on-delivery', date: '2025-08-30' },
+                { id: 3, code: 'ORD-003', customer: 'سالمة عبد الله', phone: '0941112233', region: 'المنطقة الوسطى', city: 'مصراتة', deliveryFee: 15.00, value: 75.00, totalValue: 90.00, delegate: 'محمود عبد الله', status: 'in-stock', date: '2025-08-31' },
+                { id: 4, code: 'ORD-004', customer: 'خالد مصطفى', phone: '0915556677', region: 'المنطقة الشرقية', city: 'شحات', deliveryFee: 30.00, value: 300.00, totalValue: 330.00, delegate: 'أحمد محمد', status: 'delivered', date: '2025-08-31' },
+                { id: 5, code: 'ORD-005', customer: 'ليلى سالم', phone: '0929998877', region: 'المنطقة الغربية', city: 'طرابلس', deliveryFee: 10.00, value: 95.00, totalValue: 105.00, delegate: 'فاطمة علي', status: 'in-stock', date: '2025-08-29' }
             ];
 
-            const ordersTableBody = document.getElementById('ordersTableBody');
+            const ordersInStockTable = document.getElementById('orders-in-stock-table-body');
+            const ordersOnDeliveryTable = document.getElementById('orders-on-delivery-table-body');
+            const deliveredOrdersTable = document.getElementById('delivered-orders-table-body');
+            const returnedOrdersTable = document.getElementById('returned-orders-table-body');
+            const canceledOrdersTable = document.getElementById('canceled-orders-table-body');
             const filterDateInput = document.getElementById('filterDate');
             const searchInput = document.getElementById('searchInput');
             const orderForm = document.getElementById('orderForm');
-            const noOrdersMessage = document.getElementById('noOrdersMessage');
+            const noInStockOrdersMessage = document.getElementById('noInStockOrdersMessage');
+            const noOnDeliveryOrdersMessage = document.getElementById('noOnDeliveryOrdersMessage');
+            const noDeliveredOrdersMessage = document.getElementById('noDeliveredOrdersMessage');
+            const noReturnedOrdersMessage = document.getElementById('noReturnedOrdersMessage');
+            const noCanceledOrdersMessage = document.getElementById('noCanceledOrdersMessage');
             const sidebar = document.getElementById('sidebar');
             const menuBtn = document.getElementById('menuBtn');
+            const regionSelect = document.getElementById('region');
+            const citySelect = document.getElementById('city');
+            const deliveryFeeInput = document.getElementById('deliveryFee');
+            const orderValueInput = document.getElementById('orderValue');
+            const totalValueInput = document.getElementById('totalValue');
+            const delegateSelect = document.getElementById('delegate');
 
             let editingOrderId = null;
+            // Define a simple user role. This can be expanded for a real system.
+            const currentUserRole = 'admin'; // 'admin' or 'delegate'
 
             // Sidebar toggle for mobile
             menuBtn.addEventListener('click', () => {
                 sidebar.classList.toggle('open');
             });
             
-            // تعيين التاريخ الافتراضي
             const today = new Date().toISOString().split('T')[0];
             filterDateInput.value = today;
 
-            const renderOrders = (filteredOrders) => {
-                ordersTableBody.innerHTML = '';
-                if (filteredOrders.length === 0) {
-                    noOrdersMessage.classList.remove('hidden');
-                } else {
-                    noOrdersMessage.classList.add('hidden');
-                    filteredOrders.forEach(order => {
-                        const statusClass = order.status === 'مكتمل' ? 'bg-green-100 text-green-800' :
-                                             order.status === 'قيد التوصيل' ? 'bg-yellow-100 text-yellow-800' :
-                                             'bg-red-100 text-red-800';
-                        const row = `
-                            <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${order.code}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.customer}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-700" dir="ltr">${order.phone}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.city}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-700" dir="ltr">${order.value.toFixed(2)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.delegate}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${order.status}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap no-print">
-                                    <div class="flex items-center gap-2">
-                                        <button onclick="printInvoice('${order.code}')" class="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-full transition" title="طباعة">
-                                            <i class="fas fa-print"></i>
-                                        </button>
-                                        <button onclick="editOrder(${order.id})" class="p-1.5 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full transition" title="تعديل">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button onclick="deleteOrder(${order.id})" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition" title="حذف">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                        ordersTableBody.innerHTML += row;
+            const citiesData = {
+                'المنطقة الجنوبية': { 'سبها': 40, 'مرزق': 50 },
+                'الجبل وباطن الجبل': { 'الزنتان': 35, 'غريان': 30 },
+                'الهلال الأول': { 'اجدابيا': 25, 'الكفرة': 60 },
+                'الهلال الثاني': { 'أوباري': 50, 'غات': 70 },
+                'الهلال الثالث': { 'جالو': 45, 'أوجلة': 45 },
+                'المنطقة الوسطى': { 'مصراتة': 15, 'سرت': 20 },
+                'المنطقة الغربية': { 'طرابلس': 10, 'الزاوية': 12, 'زليتن': 18 },
+                'المنطقة الشرقية': { 'شحات': 30, 'البيضاء': 30, 'درنة': 30, 'طبرق': 30, 'سوسه': 30, 'أجدابيا': 30, 'بنغازي': 25 },
+                'مناطق مختلفة': {}
+            };
+            
+            const delegatesByRegion = {
+                'المنطقة الجنوبية': ['محمد علي', 'عبدالله سالم'],
+                'الجبل وباطن الجبل': ['محمود عبد الله'],
+                'الهلال الأول': ['أحمد محمد', 'فاطمة علي'],
+                'الهلال الثاني': ['سالم حسين'],
+                'الهلال الثالث': ['خالد محمد'],
+                'المنطقة الوسطى': ['فاطمة علي', 'أحمد محمد'],
+                'المنطقة الغربية': ['أحمد محمد'],
+                'المنطقة الشرقية': ['فاطمة علي'],
+                'مناطق مختلفة': ['أحمد محمد', 'فاطمة علي', 'محمود عبد الله']
+            };
+
+            regionSelect.addEventListener('change', () => {
+                const selectedRegion = regionSelect.value;
+                citySelect.innerHTML = '<option value="">اختر المدينة</option>';
+                delegateSelect.innerHTML = '<option value="">اختر المندوب</option>';
+                deliveryFeeInput.value = 0;
+                totalValueInput.value = 0;
+
+                if (selectedRegion && citiesData[selectedRegion]) {
+                    const cities = citiesData[selectedRegion];
+                    for (const city in cities) {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = `${city} (${cities[city]} د.ل)`;
+                        citySelect.appendChild(option);
+                    }
+                }
+                
+                if (selectedRegion && delegatesByRegion[selectedRegion]) {
+                    const delegates = delegatesByRegion[selectedRegion];
+                    delegates.forEach(delegateName => {
+                        const option = document.createElement('option');
+                        option.value = delegateName;
+                        option.textContent = delegateName;
+                        delegateSelect.appendChild(option);
                     });
                 }
+            });
+
+            citySelect.addEventListener('change', () => {
+                const selectedRegion = regionSelect.value;
+                const selectedCity = citySelect.value;
+                if (selectedRegion && selectedCity) {
+                    deliveryFeeInput.value = citiesData[selectedRegion][selectedCity];
+                }
+                calculateTotal();
+            });
+
+            orderValueInput.addEventListener('input', calculateTotal);
+            deliveryFeeInput.addEventListener('input', calculateTotal);
+            
+            function calculateTotal() {
+                const orderValue = parseFloat(orderValueInput.value) || 0;
+                const deliveryFee = parseFloat(deliveryFeeInput.value) || 0;
+                totalValueInput.value = (orderValue + deliveryFee).toFixed(2);
+            }
+
+            const renderOrders = (filteredOrders) => {
+                ordersInStockTable.innerHTML = '';
+                ordersOnDeliveryTable.innerHTML = '';
+                deliveredOrdersTable.innerHTML = '';
+                returnedOrdersTable.innerHTML = '';
+                canceledOrdersTable.innerHTML = '';
+
+                const inStockOrders = filteredOrders.filter(o => o.status === 'in-stock');
+                const onDeliveryOrders = filteredOrders.filter(o => o.status === 'on-delivery');
+                const deliveredOrders = filteredOrders.filter(o => o.status === 'delivered');
+                const returnedOrders = filteredOrders.filter(o => o.status === 'returned');
+                const canceledOrders = filteredOrders.filter(o => o.status === 'canceled');
+
+                if (inStockOrders.length === 0) noInStockOrdersMessage.classList.remove('hidden'); else noInStockOrdersMessage.classList.add('hidden');
+                if (onDeliveryOrders.length === 0) noOnDeliveryOrdersMessage.classList.remove('hidden'); else noOnDeliveryOrdersMessage.classList.add('hidden');
+                if (deliveredOrders.length === 0) noDeliveredOrdersMessage.classList.remove('hidden'); else noDeliveredOrdersMessage.classList.add('hidden');
+                if (returnedOrders.length === 0) noReturnedOrdersMessage.classList.remove('hidden'); else noReturnedOrdersMessage.classList.add('hidden');
+                if (canceledOrders.length === 0) noCanceledOrdersMessage.classList.remove('hidden'); else noCanceledOrdersMessage.classList.add('hidden');
+
+
+                const createRow = (order, isCanceledOrInStock) => {
+                    const delegateCell = isCanceledOrInStock ? '' : `
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                            ${order.delegate || 'غير محدد'}
+                        </td>
+                    `;
+                    const delegateHeader = isCanceledOrInStock ? '' : `
+                        <th class="px-6 py-3 font-semibold text-gray-700">المندوب</th>
+                    `;
+
+                    let actionsHtml = '';
+                    if (order.status === 'in-stock') {
+                        actionsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeStatus(${order.id}, 'on-delivery')" class="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-full transition" title="استلام">
+                                    <i class="fas fa-truck"></i>
+                                </button>
+                                <button onclick="editOrder(${order.id})" class="p-1.5 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full transition" title="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteOrder(${order.id})" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition" title="حذف">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                ${currentUserRole === 'admin' ? `
+                                    <button onclick="changeStatus(${order.id}, 'canceled')" class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition" title="إلغاء الطلب">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `;
+                    } else if (order.status === 'on-delivery') {
+                        actionsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeStatus(${order.id}, 'delivered')" class="p-1.5 text-green-700 hover:text-green-900 hover:bg-green-100 rounded-full transition" title="تم التسليم">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                                <button onclick="changeStatus(${order.id}, 'returned')" class="p-1.5 text-yellow-700 hover:text-yellow-900 hover:bg-yellow-100 rounded-full transition" title="طلب مرتجع">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button onclick="printInvoice('${order.code}')" class="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-full transition" title="طباعة">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </div>
+                        `;
+                    } else if (order.status === 'delivered' || order.status === 'returned') {
+                        actionsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="printInvoice('${order.code}')" class="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-full transition" title="طباعة">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </div>
+                        `;
+                    } else if (order.status === 'canceled') {
+                        actionsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="printInvoice('${order.code}')" class="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-full transition" title="طباعة">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    const statusText = {
+                        'in-stock': 'في المخزن',
+                        'on-delivery': 'قيد التوصيل',
+                        'delivered': 'تم التسليم',
+                        'returned': 'مرتجع',
+                        'canceled': 'ملغاة'
+                    }[order.status];
+
+                    return `
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${order.code}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.customer}</td>
+                            ${delegateCell}
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">${order.city}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700" dir="ltr">${order.totalValue.toFixed(2)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-pill status-${order.status}">${statusText}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap no-print">${actionsHtml}</td>
+                        </tr>
+                    `;
+                };
+
+                // Clear tables and render based on status
+                inStockOrders.forEach(order => ordersInStockTable.innerHTML += createRow(order, true));
+                onDeliveryOrders.forEach(order => ordersOnDeliveryTable.innerHTML += createRow(order, false));
+                deliveredOrders.forEach(order => deliveredOrdersTable.innerHTML += createRow(order, false));
+                returnedOrders.forEach(order => returnedOrdersTable.innerHTML += createRow(order, false));
+                canceledOrders.forEach(order => canceledOrdersTable.innerHTML += createRow(order, true));
+
             };
 
             const filterAndSearch = () => {
                 const dateFilter = filterDateInput.value;
                 const searchTerm = searchInput.value.toLowerCase();
-
+            
                 const filteredOrders = orders.filter(order => {
                     const matchesDate = order.date === dateFilter;
                     const matchesSearch = searchTerm === '' || 
@@ -347,9 +639,6 @@
                 renderOrders(filteredOrders);
             };
 
-            filterDateInput.addEventListener('change', filterAndSearch);
-            searchInput.addEventListener('input', filterAndSearch);
-
             orderForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newOrder = {
@@ -357,27 +646,31 @@
                     code: document.getElementById('orderCode').value,
                     customer: document.getElementById('customerName').value,
                     phone: document.getElementById('customerPhone').value,
-                    city: document.getElementById('city').value,
-                    value: parseFloat(document.getElementById('orderValue').value),
-                    delegate: document.getElementById('delegate').value,
-                    status: 'قيد التوصيل',
+                    region: regionSelect.value,
+                    city: citySelect.value,
+                    deliveryFee: parseFloat(deliveryFeeInput.value),
+                    value: parseFloat(orderValueInput.value),
+                    totalValue: parseFloat(totalValueInput.value),
+                    delegate: delegateSelect.value,
+                    status: 'in-stock', // New orders start with 'in-stock' status
                     date: today
                 };
                 
                 if (editingOrderId) {
                     const index = orders.findIndex(o => o.id === editingOrderId);
                     if (index !== -1) {
-                        orders[index] = newOrder;
+                        orders[index] = { ...orders[index], ...newOrder };
                     }
-                    editingOrderId = null;
-                    document.getElementById('formTitle').textContent = 'إضافة طلب جديد';
-                    document.getElementById('submitButtonText').textContent = 'إضافة طلب';
-                    document.getElementById('cancelEditBtn').classList.add('hidden');
                 } else {
                     orders.push(newOrder);
                 }
 
                 orderForm.reset();
+                editingOrderId = null;
+                document.getElementById('formTitle').textContent = 'إضافة طلب جديد';
+                document.getElementById('submitButtonText').textContent = 'إضافة طلب';
+                document.getElementById('cancelEditBtn').classList.add('hidden');
+                calculateTotal();
                 filterAndSearch();
             });
 
@@ -388,9 +681,14 @@
                     document.getElementById('orderCode').value = orderToEdit.code;
                     document.getElementById('customerName').value = orderToEdit.customer;
                     document.getElementById('customerPhone').value = orderToEdit.phone;
-                    document.getElementById('city').value = orderToEdit.city;
                     document.getElementById('orderValue').value = orderToEdit.value;
-                    document.getElementById('delegate').value = orderToEdit.delegate;
+                    
+                    regionSelect.value = orderToEdit.region;
+                    regionSelect.dispatchEvent(new Event('change'));
+                    citySelect.value = orderToEdit.city;
+                    deliveryFeeInput.value = orderToEdit.deliveryFee;
+                    delegateSelect.value = orderToEdit.delegate;
+                    calculateTotal();
 
                     document.getElementById('formTitle').textContent = `تعديل الطلب ${orderToEdit.code}`;
                     document.getElementById('submitButtonText').textContent = 'حفظ التعديلات';
@@ -405,10 +703,12 @@
                 document.getElementById('formTitle').textContent = 'إضافة طلب جديد';
                 document.getElementById('submitButtonText').textContent = 'إضافة طلب';
                 document.getElementById('cancelEditBtn').classList.add('hidden');
+                calculateTotal();
             });
 
+            // Modified deleteOrder function
             window.deleteOrder = (id) => {
-                if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+                if (confirm('هل أنت متأكد من حذف هذا الطلب بشكل نهائي؟')) {
                     const index = orders.findIndex(o => o.id === id);
                     if (index !== -1) {
                         orders.splice(index, 1);
@@ -416,25 +716,57 @@
                     }
                 }
             };
+            
+            // Modified changeStatus function
+            window.changeStatus = (id, newStatus) => {
+                const order = orders.find(o => o.id === id);
+                if (order) {
+                    if (newStatus === 'canceled' && !confirm('هل أنت متأكد من إلغاء هذا الطلب؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+                        return; // Stop the function if user cancels
+                    }
+                    order.status = newStatus;
+                    filterAndSearch();
+                }
+            };
 
             window.printInvoice = (code) => {
                 const order = orders.find(o => o.code === code);
                 if (order) {
+                    const printContents = document.getElementById('invoiceTemplate').innerHTML;
+                    const originalContents = document.body.innerHTML;
+                    
+                    document.body.innerHTML = printContents;
                     document.getElementById('invoiceNumber').textContent = `رقم الفاتورة: ${order.code}`;
                     document.getElementById('invoiceDate').textContent = `التاريخ: ${order.date}`;
                     document.getElementById('invoiceCustomer').textContent = order.customer;
                     document.getElementById('invoicePhone').textContent = order.phone;
+                    document.getElementById('invoiceRegion').textContent = order.region;
                     document.getElementById('invoiceCity').textContent = order.city;
-                    document.getElementById('invoiceValue').textContent = `${order.value.toFixed(2)} د.ل`;
-                    document.getElementById('invoiceDelegate').textContent = order.delegate;
+                    document.getElementById('invoiceOrderValue').textContent = `${order.value.toFixed(2)} د.ل`;
+                    document.getElementById('invoiceDeliveryFee').textContent = `${order.deliveryFee.toFixed(2)} د.ل`;
+                    document.getElementById('invoiceTotalValue').textContent = `${order.totalValue.toFixed(2)} د.ل`;
                     
                     window.print();
+                    document.body.innerHTML = originalContents;
+                    window.location.reload();
                 }
             };
 
             document.getElementById('printAllBtn').addEventListener('click', () => {
+                const allTables = document.querySelectorAll('.print-table-section');
+                let printContents = '';
+                allTables.forEach(table => {
+                    printContents += table.outerHTML;
+                });
+                const originalContents = document.body.innerHTML;
+                document.body.innerHTML = `<div class="print-table-section">${printContents}</div>`;
                 window.print();
+                document.body.innerHTML = originalContents;
+                window.location.reload();
             });
+
+            filterDateInput.addEventListener('change', filterAndSearch);
+            searchInput.addEventListener('input', filterAndSearch);
 
             filterAndSearch();
         });
