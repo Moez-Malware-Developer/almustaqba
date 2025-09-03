@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - VELO Velocity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #045482;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .main-button {
+            background-color: #EB630A;
+            transition: all 0.2s ease;
+        }
+        .main-button:hover {
+            background-color: #d15809;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container text-center">
+        <h1 class="text-4xl font-bold text-[#045482] mb-2">VELO Velocity</h1>
+        <p class="text-gray-500 mb-8">لوحة تحكم إدارة الشحنات</p>
+
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="username" class="sr-only">اسم المستخدم</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="username" name="username" class="w-full pl-10 pr-4 py-3 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#EB630A]" placeholder="اسم المستخدم" required>
+                </div>
+            </div>
+            <div>
+                <label for="password" class="sr-only">كلمة المرور</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password" name="password" class="w-full pl-10 pr-4 py-3 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#EB630A]" placeholder="كلمة المرور" required>
+                    <button type="button" id="togglePassword" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" class="main-button w-full text-white font-semibold py-3 rounded-lg shadow-md">
+                تسجيل الدخول
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const usersKey = 'appUsers';
+
+            // Toggle password visibility
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                const icon = togglePasswordBtn.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+
+            // Handle form submission
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                const users = JSON.parse(localStorage.getItem(usersKey)) || [];
+                const user = users.find(u => u.name === username && u.password === password);
+
+                if (user) {
+                    // Successful login
+                    alert('تم تسجيل الدخول بنجاح!');
+                    // Redirect to the dashboard or main page
+                    window.location.href = 'الرئسيه.html'; 
+                } else {
+                    // Failed login
+                    alert('اسم المستخدم أو كلمة المرور غير صحيحة.');
+                }
+            });
+
+            // Check if there are any users, if not, create a default admin user
+            const users = JSON.parse(localStorage.getItem(usersKey)) || [];
+            if (users.length === 0) {
+                const defaultUser = [{
+                    id: Date.now().toString(),
+                    name: 'admin',
+                    password: '123',
+                    role: 'admin'
+                }];
+                localStorage.setItem(usersKey, JSON.stringify(defaultUser));
+                console.log('تم إنشاء مستخدم افتراضي: اسم المستخدم: admin، كلمة المرور: 123');
+            }
+        });
+    </script>
+</body>
+</html>
