@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إرسال الإشعارات - VELO Velocity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { 
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f0f4f8;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #045482;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #056a9e;
+        }
+        .main-button {
+            background-color: #045482;
+            transition: all 0.2s ease;
+        }
+        .main-button:hover {
+            background-color: #056a9e;
+        }
+        .accent-color {
+            color: #EB630A;
+        }
+        .bg-accent {
+            background-color: #EB630A;
+        }
+        .ring-accent {
+            --tw-ring-color: #f7a972;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <button id="menuBtn" class="fixed top-4 right-4 z-50 p-3 bg-[#045482] text-white rounded-lg shadow-lg lg:hidden">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6">
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#056a9e] pb-4">VELO Velocity</h1>
+            <nav class="space-y-3">
+                <a href="الرئسيه.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-home text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="الطلبات.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الطلبات</span>
+                </a>
+                <a href="المناديب.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-truck text-lg"></i>
+                    <span>إدارة المندوبين</span>
+                </a>
+                <a href="./ادارت المستخدمين.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>إدارة المستخدمين</span>
+                </a>
+                <a href="notifications.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#EB630A] text-[#045482] font-semibold sidebar-link">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span>إرسال الإشعارات</span>
+                </a>
+                <a href="البيانات.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-chart-bar text-lg"></i>
+                    <span>التقارير</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-8">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                <i class="fas fa-bell accent-color"></i>
+                <span>إرسال الإشعارات</span>
+            </h1>
+            <p class="text-gray-500 mb-6">أرسل إشعارات مخصصة لجميع المندوبين.</p>
+            
+            <form id="notificationForm" class="space-y-6">
+                <div>
+                    <label for="notificationTitle" class="block text-gray-700 font-medium mb-1">عنوان الإشعار</label>
+                    <input type="text" id="notificationTitle" class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" placeholder="مثال: تحديث جديد للنظام" required />
+                </div>
+                
+                <div>
+                    <label for="notificationContent" class="block text-gray-700 font-medium mb-1">محتوى الإشعار</label>
+                    <textarea id="notificationContent" rows="6" class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" placeholder="اكتب نص الإشعار هنا..." required></textarea>
+                </div>
+                
+                <div class="text-left mt-6">
+                    <button type="submit" class="main-button text-white font-semibold px-8 py-3 rounded-lg shadow-md">
+                        <i class="fas fa-paper-plane ml-2"></i>
+                        إرسال الإشعار
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                <i class="fas fa-history text-gray-500 ml-2"></i>
+                سجل الإشعارات المرسلة
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-right divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 font-semibold text-gray-700">التاريخ</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">العنوان</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700">المحتوى</th>
+                            <th class="px-6 py-3 font-semibold text-gray-700 text-left">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notificationsTableBody" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const notificationForm = document.getElementById('notificationForm');
+            const notificationsTableBody = document.getElementById('notificationsTableBody');
+            
+            const notificationsKey = 'sentNotifications';
+
+            // Sidebar toggle for mobile
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Load notifications from local storage and render table
+            const loadNotifications = () => {
+                const notifications = JSON.parse(localStorage.getItem(notificationsKey)) || [];
+                renderNotificationsTable(notifications);
+            };
+
+            // Render the notifications table
+            const renderNotificationsTable = (notifications) => {
+                notificationsTableBody.innerHTML = '';
+                if (notifications.length === 0) {
+                    notificationsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-gray-500 py-4">لا توجد إشعارات مرسلة.</td></tr>`;
+                    return;
+                }
+                
+                notifications.forEach((notification) => {
+                    const row = document.createElement('tr');
+                    row.classList.add('hover:bg-gray-50', 'transition-colors', 'duration-150');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">${new Date(notification.date).toLocaleDateString('ar-LY')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${notification.title}</td>
+                        <td class="px-6 py-4 text-gray-700 max-w-sm overflow-hidden text-ellipsis">${notification.content}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-left">
+                            <button type="button" class="text-red-600 hover:text-red-900 delete-btn" data-id="${notification.id}">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </td>
+                    `;
+                    notificationsTableBody.appendChild(row);
+                });
+            };
+
+            // Handle form submission
+            notificationForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('notificationTitle').value;
+                const content = document.getElementById('notificationContent').value;
+                
+                const newNotification = {
+                    id: Date.now().toString(),
+                    date: new Date().toISOString(),
+                    title: title,
+                    content: content
+                };
+
+                let notifications = JSON.parse(localStorage.getItem(notificationsKey)) || [];
+                notifications.push(newNotification);
+                localStorage.setItem(notificationsKey, JSON.stringify(notifications));
+
+                alert('تم إرسال الإشعار بنجاح لجميع المندوبين!');
+                notificationForm.reset();
+                loadNotifications();
+            });
+
+            // Handle delete button via event delegation
+            notificationsTableBody.addEventListener('click', (e) => {
+                if (e.target.closest('.delete-btn')) {
+                    const id = e.target.closest('.delete-btn').dataset.id;
+                    if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
+                        let notifications = JSON.parse(localStorage.getItem(notificationsKey)) || [];
+                        notifications = notifications.filter(n => n.id !== id);
+                        localStorage.setItem(notificationsKey, JSON.stringify(notifications));
+                        loadNotifications();
+                    }
+                }
+            });
+
+            // Initial load of notifications
+            loadNotifications();
+        });
+    </script>
+</body>
+</html>

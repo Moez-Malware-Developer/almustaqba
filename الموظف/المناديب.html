@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إدارة المندوبين - VELO Velocity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #045482;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #056a9e;
+        }
+        .main-button {
+            background-color: #EB630A;
+            transition: all 0.2s ease;
+        }
+        .main-button:hover {
+            background-color: #d45a00;
+        }
+        .accent-color {
+            color: #EB630A;
+        }
+        .focus-ring-accent {
+            --tw-ring-color: #f7a972;
+            border-color: #EB630A;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            animation: slideUp 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex min-h-screen">
+
+    <button id="mobile-menu-button" class="lg:hidden fixed top-4 right-4 z-50 bg-[#045482] p-3 rounded-lg text-white shadow-lg">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+    
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6">
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#056a9e] pb-4">VELO Velocity</h1>
+            <nav class="space-y-3">
+                <a href="./الرئسيه.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-home text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="./الطلبات.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الطلبات</span>
+                </a>
+                <a href="./المناديب.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#EB630A] text-[#045482] font-semibold sidebar-link">
+                    <i class="fas fa-truck text-lg"></i>
+                    <span>إدارة المندوبين</span>
+                </a>
+               
+                  <a href="notifications.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span>إرسال الإشعارات</span>
+                </a>
+                
+                <a href="#" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-8">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                <i class="fas fa-truck accent-color"></i>
+                <span>إدارة المندوبين</span>
+            </h1>
+            <p class="text-gray-500 mb-6">يمكنك هنا إضافة، عرض، وتعديل بيانات المندوبين.</p>
+            
+            <form id="delegateForm" class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-8">
+                <h2 id="formTitle" class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                    <i class="fas fa-user-plus accent-color"></i>
+                    <span>إضافة مندوب جديد</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label for="delegateName" class="block text-gray-700 font-medium mb-1">الاسم <span class="text-red-500">*</span></label>
+                        <input type="text" id="delegateName" name="delegateName" required 
+                               class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus-ring-accent transition">
+                    </div>
+                    <div>
+                        <label for="delegatePhone" class="block text-gray-700 font-medium mb-1">رقم الهاتف <span class="text-red-500">*</span></label>
+                        <input type="tel" id="delegatePhone" name="delegatePhone" required 
+                               class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus-ring-accent transition" dir="ltr">
+                    </div>
+                    <div>
+                        <label for="delegatePassword" class="block text-gray-700 font-medium mb-1">كلمة المرور <span class="text-red-500">*</span></label>
+                        <input type="password" id="delegatePassword" name="delegatePassword" required 
+                               class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus-ring-accent transition">
+                    </div>
+                    <div>
+                        <label for="delegateBirthdate" class="block text-gray-700 font-medium mb-1">تاريخ الميلاد</label>
+                        <input type="date" id="delegateBirthdate" name="delegateBirthdate"
+                               class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus-ring-accent transition">
+                    </div>
+                    <div>
+                        <label for="delegateCity" class="block text-gray-700 font-medium mb-1">المدينة</label>
+                        <input type="text" id="delegateCity" name="delegateCity"
+                               class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus-ring-accent transition">
+                    </div>
+                    <div>
+                        <label for="delegateImage" class="block text-gray-700 font-medium mb-1">صورة شخصية</label>
+                        <input type="file" id="delegateImage" name="delegateImage"
+                               class="w-full px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus-ring-accent transition">
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-3">
+                    <button type="submit" id="submitButton" class="main-button text-white px-6 py-2 rounded-lg flex items-center gap-2 shadow-md">
+                        <i class="fas fa-plus"></i>
+                        <span>إضافة مندوب</span>
+                    </button>
+                    <button type="button" id="cancelEditBtn" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition hidden">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <h2 class="text-2xl font-bold text-gray-700">قائمة المندوبين</h2>
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="searchInput" placeholder="بحث بالاسم أو الرقم..." 
+                               class="w-full pl-12 pr-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus-ring-accent transition" />
+                        <i class="fas fa-search text-gray-400 absolute right-4 top-1/2 -translate-y-1/2"></i>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-gray-700">#</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الصورة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الاسم</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">رقم الهاتف</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">الحالة</th>
+                                <th class="px-6 py-3 font-semibold text-gray-700">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="delegatesTableBody" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+                <div id="noDelegatesMessage" class="text-center text-gray-500 py-8 hidden">
+                    <p>لا يوجد مندوبون لعرضهم. ابدأ بإضافة مندوب جديد! 🚀</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="financialModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-200 mb-4">
+                <h3 class="text-2xl font-bold text-gray-800">التفاصيل المالية للمندوب</h3>
+                <button onclick="hideFinancialDetails()" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-gray-100 p-4 rounded-lg flex justify-between items-center">
+                    <span class="text-gray-600 font-medium">المبلغ المستلم:</span>
+                    <span class="text-green-600 font-bold text-lg" id="receivedAmount"></span>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg flex justify-between items-center">
+                    <span class="text-gray-600 font-medium">المبلغ المتبقي:</span>
+                    <span class="text-red-600 font-bold text-lg" id="remainingAmount"></span>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg flex justify-between items-center">
+                    <span class="text-gray-600 font-medium">إجمالي الكاش:</span>
+                    <span class="text-gray-800 font-bold text-lg" id="cashAmount"></span>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg flex justify-between items-center">
+                    <span class="text-gray-600 font-medium">إجمالي موبي كاش:</span>
+                    <span class="text-gray-800 font-bold text-lg" id="mobiCashAmount"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const delegates = [
+                { id: 1, name: 'أحمد محمد', phone: '091-1234567', status: 'يعمل', image: null, financial: { received: 1000, remaining: 200, cash: 500, mobiCash: 300 } },
+                { id: 2, name: 'فاطمة علي', phone: '092-9876543', status: 'لا يعمل', image: null, financial: { received: 800, remaining: 0, cash: 400, mobiCash: 400 } },
+                { id: 3, name: 'محمود عبد الله', phone: '094-5678901', status: 'يعمل', image: null, financial: { received: 1500, remaining: 50, cash: 1000, mobiCash: 500 } }
+            ];
+
+            const delegatesTableBody = document.getElementById('delegatesTableBody');
+            const searchInput = document.getElementById('searchInput');
+            const delegateForm = document.getElementById('delegateForm');
+            const noDelegatesMessage = document.getElementById('noDelegatesMessage');
+            const formTitle = document.getElementById('formTitle');
+            const submitButton = document.getElementById('submitButton');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+            const modal = document.getElementById('financialModal');
+            
+            let editingDelegateId = null;
+
+            // Sidebar toggle for mobile
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const sidebar = document.getElementById('sidebar');
+            mobileMenuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            const renderDelegates = (filteredDelegates) => {
+                delegatesTableBody.innerHTML = '';
+                if (filteredDelegates.length === 0) {
+                    noDelegatesMessage.classList.remove('hidden');
+                } else {
+                    noDelegatesMessage.classList.add('hidden');
+                    filteredDelegates.forEach((delegate, index) => {
+                        const statusClass = delegate.status === 'يعمل' ? 'bg-green-100 text-green-800 border-green-200' :
+                                             'bg-red-100 text-red-800 border-red-200';
+                        const row = `
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${index + 1}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-500 text-xl"></i>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700">${delegate.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700" dir="ltr">${delegate.phone}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full border ${statusClass}">${delegate.status}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex gap-2">
+                                        <button onclick="showFinancialDetails(${delegate.id})" class="p-1.5 text-blue-700 hover:text-blue-900 hover:bg-blue-100 rounded-full transition" title="عرض التفاصيل المالية">
+                                            <i class="fas fa-sack-dollar"></i>
+                                        </button>
+                                        <button onclick="editDelegate(${delegate.id})" class="p-1.5 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-100 rounded-full transition" title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteDelegate(${delegate.id})" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition" title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        delegatesTableBody.innerHTML += row;
+                    });
+                }
+            };
+
+            const filterAndSearch = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredDelegates = delegates.filter(d => 
+                    d.name.toLowerCase().includes(searchTerm) || 
+                    d.phone.includes(searchTerm)
+                );
+                renderDelegates(filteredDelegates);
+            };
+
+            searchInput.addEventListener('input', filterAndSearch);
+            
+            delegateForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newDelegate = {
+                    id: editingDelegateId || Date.now(),
+                    name: document.getElementById('delegateName').value,
+                    phone: document.getElementById('delegatePhone').value,
+                    password: document.getElementById('delegatePassword').value,
+                    birthdate: document.getElementById('delegateBirthdate').value,
+                    city: document.getElementById('delegateCity').value,
+                    image: null,
+                    status: 'يعمل',
+                    financial: { received: 0, remaining: 0, cash: 0, mobiCash: 0 }
+                };
+
+                if (editingDelegateId) {
+                    const index = delegates.findIndex(d => d.id === editingDelegateId);
+                    if (index !== -1) {
+                        delegates[index] = newDelegate;
+                    }
+                    editingDelegateId = null;
+                    formTitle.innerHTML = `<i class="fas fa-user-plus accent-color"></i><span>إضافة مندوب جديد</span>`;
+                    submitButton.innerHTML = `<i class="fas fa-plus"></i><span>إضافة مندوب</span>`;
+                    cancelEditBtn.classList.add('hidden');
+                } else {
+                    delegates.push(newDelegate);
+                }
+
+                delegateForm.reset();
+                filterAndSearch();
+            });
+
+            window.editDelegate = (id) => {
+                const delegateToEdit = delegates.find(d => d.id === id);
+                if (delegateToEdit) {
+                    editingDelegateId = id;
+                    document.getElementById('delegateName').value = delegateToEdit.name;
+                    document.getElementById('delegatePhone').value = delegateToEdit.phone;
+                    document.getElementById('delegatePassword').value = ''; // Should not pre-fill passwords
+                    document.getElementById('delegateBirthdate').value = delegateToEdit.birthdate;
+                    document.getElementById('delegateCity').value = delegateToEdit.city;
+
+                    formTitle.innerHTML = `<i class="fas fa-user-edit accent-color"></i><span>تعديل بيانات المندوب</span>`;
+                    submitButton.innerHTML = `<i class="fas fa-save"></i><span>حفظ التعديلات</span>`;
+                    cancelEditBtn.classList.remove('hidden');
+                    window.scrollTo({ top: delegateForm.offsetTop, behavior: 'smooth' });
+                }
+            };
+
+            cancelEditBtn.addEventListener('click', () => {
+                editingDelegateId = null;
+                delegateForm.reset();
+                formTitle.innerHTML = `<i class="fas fa-user-plus accent-color"></i><span>إضافة مندوب جديد</span>`;
+                submitButton.innerHTML = `<i class="fas fa-plus"></i><span>إضافة مندوب</span>`;
+                cancelEditBtn.classList.add('hidden');
+            });
+
+            window.deleteDelegate = (id) => {
+                if (confirm('هل أنت متأكد من حذف هذا المندوب؟')) {
+                    const index = delegates.findIndex(d => d.id === id);
+                    if (index !== -1) {
+                        delegates.splice(index, 1);
+                        filterAndSearch();
+                    }
+                }
+            };
+            
+            window.showFinancialDetails = (id) => {
+                const delegate = delegates.find(d => d.id === id);
+                if (delegate) {
+                    document.getElementById('receivedAmount').textContent = `${delegate.financial.received.toFixed(2)} د.ل`;
+                    document.getElementById('remainingAmount').textContent = `${delegate.financial.remaining.toFixed(2)} د.ل`;
+                    document.getElementById('cashAmount').textContent = `${delegate.financial.cash.toFixed(2)} د.ل`;
+                    document.getElementById('mobiCashAmount').textContent = `${delegate.financial.mobiCash.toFixed(2)} د.ل`;
+                    modal.style.display = 'block';
+                }
+            };
+
+            window.hideFinancialDetails = () => {
+                modal.style.display = 'none';
+            };
+
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+
+            filterAndSearch();
+        });
+    </script>
+</body>
+</html>

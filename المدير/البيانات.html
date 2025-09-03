@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>التقارير - VELO Velocity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { 
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f0f4f8;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #045482;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #056a9e;
+        }
+        .main-button {
+            background-color: #045482;
+            transition: all 0.2s ease;
+        }
+        .main-button:hover {
+            background-color: #056a9e;
+        }
+        .accent-color {
+            color: #EB630A;
+        }
+        .bg-accent {
+            background-color: #EB630A;
+        }
+        .ring-accent {
+            --tw-ring-color: #f7a972;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-in-stock { background-color: #e0f2fe; color: #0369a1; }
+        .status-on-delivery { background-color: #cffafe; color: #0891b2; }
+        .status-delivered { background-color: #d1fae5; color: #065f46; }
+        .status-returned { background-color: #fef9c3; color: #854d0e; }
+        .status-canceled { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <button id="menuBtn" class="fixed top-4 right-4 z-50 p-3 bg-[#045482] text-white rounded-lg shadow-lg lg:hidden">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6">
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#056a9e] pb-4">VELO Velocity</h1>
+            <nav class="space-y-3">
+                <a href="./الرئسيه.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-home text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="./الطلبات.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الطلبات</span>
+                </a>
+                <a href="./المناديب.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-truck text-lg"></i>
+                    <span>إدارة المندوبين</span>
+                </a>
+                <a href="./ادارت المستخدمين.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>إدارة المستخدمين</span>
+                </a>
+                  <a href="notifications.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span>إرسال الإشعارات</span>
+                </a>
+                <a href="./البيانات.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#EB630A] text-[#045482] font-semibold sidebar-link">
+                    <i class="fas fa-chart-bar text-lg"></i>
+                    <span>التقارير</span>
+                </a>
+                <a href="./settings.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#056a9e] sidebar-link">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+    <main class="flex-1 p-4 md:p-8">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                <i class="fas fa-chart-bar accent-color"></i>
+                <span>تقارير مفصلة</span>
+            </h1>
+            <p class="text-gray-500 mb-6">احصل على نظرة عامة مفصلة على أداء الطلبات.</p>
+
+            <div class="flex flex-col md:flex-row items-center gap-4 mb-8 p-4 bg-gray-100 rounded-lg border border-gray-200">
+                <div class="flex items-center gap-2">
+                    <label for="startDate" class="font-medium text-gray-700">من تاريخ:</label>
+                    <input type="date" id="startDate" class="px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" />
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="endDate" class="font-medium text-gray-700">إلى تاريخ:</label>
+                    <input type="date" id="endDate" class="px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" />
+                </div>
+                <button id="applyDateFilter" class="main-button text-white px-6 py-2 rounded-lg shadow-sm">
+                    تطبيق
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gray-100 p-6 rounded-lg shadow-inner flex items-center gap-4">
+                    <i class="fas fa-receipt text-3xl accent-color"></i>
+                    <div>
+                        <p class="text-gray-500">إجمالي قيمة الطلبات</p>
+                        <h3 class="text-2xl font-bold" id="totalValue">0 د.ل</h3>
+                    </div>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-inner flex items-center gap-4">
+                    <i class="fas fa-check-circle text-3xl text-green-600"></i>
+                    <div>
+                        <p class="text-gray-500">الطلبات التي تم تسليمها</p>
+                        <h3 class="text-2xl font-bold" id="deliveredCount">0</h3>
+                    </div>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-inner flex items-center gap-4">
+                    <i class="fas fa-truck text-3xl text-blue-600"></i>
+                    <div>
+                        <p class="text-gray-500">الطلبات قيد التوصيل</p>
+                        <h3 class="text-2xl font-bold" id="onDeliveryCount">0</h3>
+                    </div>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-inner flex items-center gap-4">
+                    <i class="fas fa-ban text-3xl text-red-600"></i>
+                    <div>
+                        <p class="text-gray-500">الطلبات الملغاة</p>
+                        <h3 class="text-2xl font-bold" id="canceledCount">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">المبيعات حسب طريقة الدفع</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-100 rounded-lg border-gray-200 shadow-inner">
+                            <p class="text-gray-600 font-medium">إجمالي المبيعات (كاش)</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="cashSales">0 د.ل</h3>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-gray-100 rounded-lg border-gray-200 shadow-inner">
+                            <p class="text-gray-600 font-medium">إجمالي المبيعات (بطاقة)</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="cardSales">0 د.ل</h3>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <canvas id="salesPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">توزيع الطلبات حسب الحالة</h2>
+                    <div class="h-80 flex items-center justify-center">
+                         <canvas id="statusPieChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">أداء الطلبات حسب الشهر</h2>
+                    <div class="h-80 flex items-center justify-center">
+                        <canvas id="monthlyBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">التقارير التفصيلية</h2>
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                    <div>
+                        <label for="reportType" class="font-medium text-gray-700">عرض التقرير حسب:</label>
+                        <select id="reportType" class="px-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition">
+                            <option value="delegate">المندوب</option>
+                            <option value="city">المدينة</option>
+                            <option value="region">المنطقة</option>
+                        </select>
+                    </div>
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="filterInput" placeholder="بحث..." class="w-full pl-12 pr-4 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 ring-accent transition" />
+                        <i class="fas fa-search text-gray-400 absolute right-4 top-1/2 -translate-y-1/2"></i>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr id="detailed-table-header"></tr>
+                        </thead>
+                        <tbody id="detailed-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                <div id="noDataMessage" class="text-center text-gray-500 py-4 hidden">
+                    <p>لا توجد بيانات متاحة لهذا التقرير.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const orders = [
+                // Sample data with new 'paymentMethod' property
+                { id: 1, code: 'ORD-001', customer: 'علي عبد السلام', phone: '0912345678', region: 'المنطقة الشرقية', city: 'شحات', deliveryFee: 30.00, value: 150.00, totalValue: 180.00, delegate: 'أحمد محمد', status: 'delivered', date: '2025-08-31', paymentMethod: 'كاش' },
+                { id: 2, code: 'ORD-002', customer: 'محمد فرج', phone: '0928765432', region: 'المنطقة الشرقية', city: 'البيضاء', deliveryFee: 30.00, value: 230.50, totalValue: 260.50, delegate: 'فاطمة علي', status: 'on-delivery', date: '2025-08-30', paymentMethod: 'بطاقة' },
+                { id: 3, code: 'ORD-003', customer: 'سالمة عبد الله', phone: '0941112233', region: 'المنطقة الوسطى', city: 'مصراتة', deliveryFee: 15.00, value: 75.00, totalValue: 90.00, delegate: 'محمود عبد الله', status: 'in-stock', date: '2025-08-31', paymentMethod: 'كاش' },
+                { id: 4, code: 'ORD-004', customer: 'خالد مصطفى', phone: '0915556677', region: 'المنطقة الشرقية', city: 'شحات', deliveryFee: 30.00, value: 300.00, totalValue: 330.00, delegate: 'أحمد محمد', status: 'delivered', date: '2025-07-25', paymentMethod: 'كاش' },
+                { id: 5, code: 'ORD-005', customer: 'ليلى سالم', phone: '0929998877', region: 'المنطقة الغربية', city: 'طرابلس', deliveryFee: 10.00, value: 95.00, totalValue: 105.00, delegate: 'فاطمة علي', status: 'returned', date: '2025-08-29', paymentMethod: 'كاش' },
+                { id: 6, code: 'ORD-006', customer: 'ناصر علي', phone: '0917778899', region: 'المنطقة الغربية', city: 'الزاوية', deliveryFee: 12.00, value: 120.00, totalValue: 132.00, delegate: 'أحمد محمد', status: 'delivered', date: '2025-08-28', paymentMethod: 'بطاقة' },
+                { id: 7, code: 'ORD-007', customer: 'سارة محمد', phone: '0923456789', region: 'المنطقة الغربية', city: 'طرابلس', deliveryFee: 10.00, value: 50.00, totalValue: 60.00, delegate: 'فاطمة علي', status: 'canceled', date: '2025-08-27', paymentMethod: 'كاش' },
+                { id: 8, code: 'ORD-008', customer: 'عمر خالد', phone: '0945554433', region: 'المنطقة الشرقية', city: 'بنغازي', deliveryFee: 25.00, value: 250.00, totalValue: 275.00, delegate: 'أحمد محمد', status: 'delivered', date: '2025-07-20', paymentMethod: 'كاش' },
+                { id: 9, code: 'ORD-009', customer: 'فاطمة علي', phone: '0911223344', region: 'المنطقة الشرقية', city: 'المرج', deliveryFee: 20.00, value: 180.00, totalValue: 200.00, delegate: 'أحمد محمد', status: 'delivered', date: '2025-07-22', paymentMethod: 'بطاقة' },
+                { id: 10, code: 'ORD-010', customer: 'علي سالم', phone: '0922334455', region: 'المنطقة الوسطى', city: 'سرت', deliveryFee: 20.00, value: 110.00, totalValue: 130.00, delegate: 'فاطمة علي', status: 'on-delivery', date: '2025-07-28', paymentMethod: 'كاش' },
+            ];
+
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const totalValueEl = document.getElementById('totalValue');
+            const deliveredCountEl = document.getElementById('deliveredCount');
+            const onDeliveryCountEl = document.getElementById('onDeliveryCount');
+            const canceledCountEl = document.getElementById('canceledCount');
+            const cashSalesEl = document.getElementById('cashSales');
+            const cardSalesEl = document.getElementById('cardSales');
+            const reportTypeSelect = document.getElementById('reportType');
+            const filterInput = document.getElementById('filterInput');
+            const detailedTableHeader = document.getElementById('detailed-table-header');
+            const detailedTableBody = document.getElementById('detailed-table-body');
+            const noDataMessage = document.getElementById('noDataMessage');
+
+            // Date filter elements
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            const applyDateFilterBtn = document.getElementById('applyDateFilter');
+
+            // Global filtered orders array
+            let filteredOrders = [...orders];
+
+            // Sidebar toggle for mobile
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Date filter function
+            const filterByDate = () => {
+                const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+                const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+
+                filteredOrders = orders.filter(order => {
+                    const orderDate = new Date(order.date);
+                    const isAfterStart = !startDate || orderDate >= startDate;
+                    const isBeforeEnd = !endDate || orderDate <= endDate;
+                    return isAfterStart && isBeforeEnd;
+                });
+                
+                // Re-render all sections with the new data
+                updateAllReports();
+            };
+
+            applyDateFilterBtn.addEventListener('click', filterByDate);
+
+            // Function to update all report sections
+            const updateAllReports = () => {
+                updateOverviewCards();
+                renderCharts();
+                renderSalesChart();
+                renderDetailedTable();
+            };
+
+            // 1. Overview Cards
+            const updateOverviewCards = () => {
+                const totalValue = filteredOrders.reduce((sum, order) => sum + order.totalValue, 0);
+                const deliveredCount = filteredOrders.filter(o => o.status === 'delivered').length;
+                const onDeliveryCount = filteredOrders.filter(o => o.status === 'on-delivery').length;
+                const canceledCount = filteredOrders.filter(o => o.status === 'canceled').length;
+
+                totalValueEl.textContent = `${totalValue.toFixed(2)} د.ل`;
+                deliveredCountEl.textContent = deliveredCount;
+                onDeliveryCountEl.textContent = onDeliveryCount;
+                canceledCountEl.textContent = canceledCount;
+            };
+
+            // 2. Main Charts (Status & Monthly)
+            let statusChartInstance = null;
+            let monthlyChartInstance = null;
+
+            const renderCharts = () => {
+                if (statusChartInstance) statusChartInstance.destroy();
+                if (monthlyChartInstance) monthlyChartInstance.destroy();
+
+                const statusCounts = filteredOrders.reduce((acc, order) => {
+                    acc[order.status] = (acc[order.status] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const statusData = {
+                    labels: ['تم التسليم', 'قيد التوصيل', 'في المخزن', 'مرتجع', 'ملغاة'],
+                    datasets: [{
+                        data: [
+                            statusCounts['delivered'] || 0,
+                            statusCounts['on-delivery'] || 0,
+                            statusCounts['in-stock'] || 0,
+                            statusCounts['returned'] || 0,
+                            statusCounts['canceled'] || 0
+                        ],
+                        backgroundColor: ['#10B981', '#3B82F6', '#60A5FA', '#FBBF24', '#EF4444'],
+                        hoverOffset: 4
+                    }]
+                };
+
+                statusChartInstance = new Chart(document.getElementById('statusPieChart'), {
+                    type: 'pie',
+                    data: statusData
+                });
+
+                const monthlyData = filteredOrders.reduce((acc, order) => {
+                    const month = new Date(order.date).toLocaleString('ar-ly', { month: 'long', year: 'numeric' });
+                    acc[month] = (acc[month] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const monthlyLabels = Object.keys(monthlyData).reverse();
+                const monthlyCounts = monthlyLabels.map(label => monthlyData[label]);
+
+                const monthlyChartData = {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'عدد الطلبات',
+                        data: monthlyCounts,
+                        backgroundColor: '#045482',
+                        borderColor: '#045482',
+                        borderWidth: 1
+                    }]
+                };
+
+                monthlyChartInstance = new Chart(document.getElementById('monthlyBarChart'), {
+                    type: 'bar',
+                    data: monthlyChartData,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            };
+
+            // 3. Sales by Payment Method
+            let salesChartInstance = null;
+
+            const renderSalesChart = () => {
+                if (salesChartInstance) salesChartInstance.destroy();
+
+                const salesByMethod = filteredOrders.filter(o => o.status === 'delivered').reduce((acc, order) => {
+                    acc[order.paymentMethod] = (acc[order.paymentMethod] || 0) + order.totalValue;
+                    return acc;
+                }, {});
+
+                cashSalesEl.textContent = `${(salesByMethod['كاش'] || 0).toFixed(2)} د.ل`;
+                cardSalesEl.textContent = `${(salesByMethod['بطاقة'] || 0).toFixed(2)} د.ل`;
+
+                const salesData = {
+                    labels: ['مبيعات كاش', 'مبيعات بطاقة'],
+                    datasets: [{
+                        data: [salesByMethod['كاش'] || 0, salesByMethod['بطاقة'] || 0],
+                        backgroundColor: ['#4CAF50', '#2196F3'],
+                        hoverOffset: 4
+                    }]
+                };
+                
+                salesChartInstance = new Chart(document.getElementById('salesPieChart'), {
+                    type: 'pie',
+                    data: salesData
+                });
+            };
+
+            // 4. Detailed Tables
+            const renderDetailedTable = () => {
+                const reportType = reportTypeSelect.value;
+                const filterTerm = filterInput.value.toLowerCase();
+                let groupedData = {};
+
+                filteredOrders.forEach(order => {
+                    const key = order[reportType] || 'غير محدد';
+                    if (!groupedData[key]) {
+                        groupedData[key] = {
+                            totalOrders: 0,
+                            delivered: 0,
+                            totalValue: 0
+                        };
+                    }
+                    groupedData[key].totalOrders += 1;
+                    groupedData[key].totalValue += order.totalValue;
+                    if (order.status === 'delivered') {
+                        groupedData[key].delivered += 1;
+                    }
+                });
+
+                let headerText = 'الاسم';
+                if (reportType === 'city') headerText = 'المدينة';
+                if (reportType === 'region') headerText = 'المنطقة';
+                
+                detailedTableHeader.innerHTML = `
+                    <th class="px-6 py-3 font-semibold text-gray-700">${headerText}</th>
+                    <th class="px-6 py-3 font-semibold text-gray-700">عدد الطلبات</th>
+                    <th class="px-6 py-3 font-semibold text-gray-700">الطلبات المسلّمة</th>
+                    <th class="px-6 py-3 font-semibold text-gray-700">إجمالي القيمة (د.ل)</th>
+                `;
+
+                detailedTableBody.innerHTML = '';
+                const sortedKeys = Object.keys(groupedData).sort((a, b) => groupedData[b].totalOrders - groupedData[a].totalOrders);
+
+                if (sortedKeys.length === 0) {
+                    noDataMessage.classList.remove('hidden');
+                    return;
+                }
+                noDataMessage.classList.add('hidden');
+
+                sortedKeys.forEach(key => {
+                    if (key.toLowerCase().includes(filterTerm)) {
+                        const data = groupedData[key];
+                        const row = document.createElement('tr');
+                        row.classList.add('hover:bg-gray-50', 'transition-colors', 'duration-150');
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${key}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">${data.totalOrders}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">${data.delivered}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700" dir="ltr">${data.totalValue.toFixed(2)}</td>
+                        `;
+                        detailedTableBody.appendChild(row);
+                    }
+                });
+            };
+
+            reportTypeSelect.addEventListener('change', renderDetailedTable);
+            filterInput.addEventListener('input', renderDetailedTable);
+
+            // Initial rendering
+            updateAllReports();
+        });
+    </script>
+</body>
+</html>
