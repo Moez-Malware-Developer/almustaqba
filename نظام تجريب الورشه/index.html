@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الرئيسية - إدارة الورش</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f3f4f6;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #A20A0A;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #C02020;
+        }
+        .accent-color {
+            color: #FF6347;
+        }
+        .bg-accent {
+            background-color: #FF6347;
+        }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen">
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md p-4 flex items-center justify-between lg:hidden">
+        <div class="flex items-center gap-4">
+            <button id="menuBtn" class="text-[#A20A0A] text-xl">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800">الرئيسية</h2>
+        </div>
+        <button id="closeAppBtn" class="text-gray-500 hover:text-gray-800 text-2xl lg:hidden">
+            <i class="fas fa-times"></i>
+        </button>
+    </header>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6 h-full flex flex-col">
+            <button id="closeSidebarBtn" class="absolute top-4 left-4 text-white text-xl lg:hidden">
+                <i class="fas fa-times"></i>
+            </button>
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#C02020] pb-4">إدارة الورش</h1>
+            <nav class="space-y-3 flex-1">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#FF6347] text-[#A20A0A] font-semibold sidebar-link">
+                    <i class="fas fa-tachometer-alt text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="repairs.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الصيانة</span>
+                </a>
+                <a href="technicians.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>إدارة الفنيين</span>
+                </a>
+                <a href="accounts.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-chart-line text-lg"></i>
+                    <span>الحسابات</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+            <a href="#" id="logoutBtn" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#C02020] sidebar-link mt-auto">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 lg:p-8 pt-[64px] lg:pt-8">
+        <h1 class="hidden lg:flex text-3xl font-bold text-gray-800 flex items-center gap-2 mb-6 border-b pb-4">
+            <i class="fas fa-tachometer-alt accent-color"></i>
+            <span>لوحة التحكم</span>
+        </h1>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col justify-center items-center text-center border-t-4 border-t-green-500">
+                <i class="fas fa-mobile-alt text-4xl text-green-500 mb-2"></i>
+                <h2 class="text-xl font-bold text-gray-700">أجهزة مستلمة اليوم</h2>
+                <p class="text-4xl font-extrabold text-gray-900 mt-2" id="devicesReceived">0</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col justify-center items-center text-center border-t-4 border-t-yellow-500">
+                <i class="fas fa-tools text-4xl text-yellow-500 mb-2"></i>
+                <h2 class="text-xl font-bold text-gray-700">أجهزة تحت الصيانة</h2>
+                <p class="text-4xl font-extrabold text-gray-900 mt-2" id="devicesUnderRepair">0</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col justify-center items-center text-center border-t-4 border-t-blue-500">
+                <i class="fas fa-check-circle text-4xl text-blue-500 mb-2"></i>
+                <h2 class="text-xl font-bold text-gray-700">أجهزة منتهية</h2>
+                <p class="text-4xl font-extrabold text-gray-900 mt-2" id="devicesFinished">0</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col justify-center items-center text-center border-t-4 border-t-red-500">
+                <i class="fas fa-dollar-sign text-4xl text-red-500 mb-2"></i>
+                <h2 class="text-xl font-bold text-gray-700">إجمالي الأرباح اليوم</h2>
+                <p class="text-4xl font-extrabold text-gray-900 mt-2" id="dailyProfit">0</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6">روابط سريعة</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="new_repair.html" class="bg-[#A20A0A] text-white p-6 rounded-lg shadow-lg hover:bg-[#C02020] transition-colors duration-200 flex flex-col items-center text-center">
+                    <i class="fas fa-plus-circle text-4xl mb-4"></i>
+                    <span class="text-lg font-semibold">إضافة صيانة جديدة</span>
+                </a>
+                <a href="technicians.html" class="bg-gray-700 text-white p-6 rounded-lg shadow-lg hover:bg-gray-800 transition-colors duration-200 flex flex-col items-center text-center">
+                    <i class="fas fa-users-cog text-4xl mb-4"></i>
+                    <span class="text-lg font-semibold">إدارة الفنيين</span>
+                </a>
+                <a href="accounts.html" class="bg-green-600 text-white p-6 rounded-lg shadow-lg hover:bg-green-700 transition-colors duration-200 flex flex-col items-center text-center">
+                    <i class="fas fa-chart-line text-4xl mb-4"></i>
+                    <span class="text-lg font-semibold">الحسابات</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const closeAppBtn = document.getElementById('closeAppBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            // وظيفة فتح/إغلاق القائمة الجانبية
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                });
+            }
+            if (closeAppBtn) {
+                closeAppBtn.addEventListener('click', () => {
+                    window.location.href = 'login.html';
+                });
+            }
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('userToken');
+                    window.location.href = 'login.html';
+                });
+            }
+
+            // هنا يمكنك إضافة استدعاءات AJAX لجلب البيانات الحقيقية
+            // For now, we'll use placeholder data
+            function fetchData() {
+                document.getElementById('devicesReceived').textContent = '12';
+                document.getElementById('devicesUnderRepair').textContent = '5';
+                document.getElementById('devicesFinished').textContent = '7';
+                document.getElementById('dailyProfit').textContent = '5,500';
+            }
+            fetchData();
+        });
+    </script>
+</body>
+</html>

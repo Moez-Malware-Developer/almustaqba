@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسجيل الدخول - إدارة الورش</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { 
+            font-family: 'Tajawal', sans-serif;
+            background-color: #A20A0A; /* لون الخلفية الرئيسي */
+        }
+        .main-container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+        }
+        .accent-color {
+            color: #A20A0A;
+        }
+        .bg-accent {
+            background-color: #A20A0A;
+        }
+        .hover-bg-accent-dark {
+            background-color: #C02020;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="main-container w-full max-w-lg p-8 shadow-2xl">
+        <div class="text-center mb-8">
+            <i class="fas fa-tools text-5xl accent-color mb-4"></i>
+            <h1 class="text-3xl font-bold text-gray-800">إدارة الورش</h1>
+        </div>
+
+        <div id="setupForm" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 text-center">الإعداد لأول مرة</h2>
+            <form id="initialSetupForm" class="space-y-4">
+                <div>
+                    <label for="shopName" class="block text-sm font-medium text-gray-700">اسم المحل</label>
+                    <input type="text" id="shopName" name="shopName" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div>
+                    <label for="shopAddress" class="block text-sm font-medium text-gray-700">عنوان المحل</label>
+                    <input type="text" id="shopAddress" name="shopAddress" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div>
+                    <label for="primaryPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف الأساسي</label>
+                    <input type="tel" id="primaryPhone" name="primaryPhone" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div>
+                    <label for="secondaryPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف الثانوي (اختياري)</label>
+                    <input type="tel" id="secondaryPhone" name="secondaryPhone" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div>
+                    <label for="facebook" class="block text-sm font-medium text-gray-700">رابط صفحة الفيسبوك (اختياري)</label>
+                    <input type="url" id="facebook" name="facebook" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700">رابط الموقع الجغرافي (اختياري)</label>
+                    <input type="url" id="location" name="location" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div>
+                    <label for="setupPassword" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+                    <input type="password" id="setupPassword" name="setupPassword" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">تأكيد كلمة المرور</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <button type="submit" class="w-full bg-[#A20A0A] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#C02020] transition-colors duration-200">
+                    إنشاء وإعداد النظام
+                </button>
+            </form>
+        </div>
+
+        <div id="loginForm">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 text-center">تسجيل الدخول</h2>
+            <form id="userLoginForm" class="space-y-4">
+                <div>
+                    <label for="loginPassword" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+                    <input type="password" id="loginPassword" name="loginPassword" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#C02020] focus:border-[#C02020]">
+                </div>
+                <div id="loginError" class="text-red-500 text-sm text-center" style="display: none;">
+                    كلمة المرور غير صحيحة.
+                </div>
+                <button type="submit" class="w-full bg-[#A20A0A] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#C02020] transition-colors duration-200">
+                    دخول
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginFormDiv = document.getElementById('loginForm');
+            const setupFormDiv = document.getElementById('setupForm');
+            const userLoginForm = document.getElementById('userLoginForm');
+            const initialSetupForm = document.getElementById('initialSetupForm');
+            const loginErrorDiv = document.getElementById('loginError');
+
+            // Simulate a check for a stored setup flag. In a real app, this would be a backend call.
+            const isSetupDone = localStorage.getItem('isSetupDone') === 'true';
+
+            if (isSetupDone) {
+                // Show login form if setup is done
+                loginFormDiv.classList.remove('hidden');
+                setupFormDiv.classList.add('hidden');
+            } else {
+                // Show setup form if it's the first time
+                loginFormDiv.classList.add('hidden');
+                setupFormDiv.classList.remove('hidden');
+            }
+
+            // Handle Setup Form submission
+            initialSetupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const setupPassword = document.getElementById('setupPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (setupPassword !== confirmPassword) {
+                    alert('كلمتا المرور غير متطابقتين!');
+                    return;
+                }
+
+                const setupData = {
+                    shopName: document.getElementById('shopName').value,
+                    shopAddress: document.getElementById('shopAddress').value,
+                    primaryPhone: document.getElementById('primaryPhone').value,
+                    secondaryPhone: document.getElementById('secondaryPhone').value,
+                    facebook: document.getElementById('facebook').value,
+                    location: document.getElementById('location').value,
+                    password: setupPassword
+                };
+
+                // In a real app, you would send this data to your server
+                console.log('Setup data submitted:', setupData);
+
+                // Simulate success
+                localStorage.setItem('isSetupDone', 'true');
+                localStorage.setItem('storedPassword', setupPassword); // Hashing and storing securely would be done on the backend
+                alert('تم الإعداد بنجاح. يرجى تسجيل الدخول.');
+                
+                // Redirect to login page or just show it
+                loginFormDiv.classList.remove('hidden');
+                setupFormDiv.classList.add('hidden');
+                initialSetupForm.reset();
+            });
+
+            // Handle Login Form submission
+            userLoginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const loginPassword = document.getElementById('loginPassword').value;
+                const storedPassword = localStorage.getItem('storedPassword'); // In a real app, this would be a backend verification
+
+                if (loginPassword === storedPassword) {
+                    // Simulate successful login
+                    console.log('Login successful');
+                    loginErrorDiv.style.display = 'none';
+                    window.location.href = 'index.html'; // Redirect to the main dashboard page
+                } else {
+                    console.log('Login failed');
+                    loginErrorDiv.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

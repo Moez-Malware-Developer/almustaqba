@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الإعدادات - إدارة الورش</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f3f4f6;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #A20A0A;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #C02020;
+        }
+        .accent-color {
+            color: #FF6347;
+        }
+        .bg-accent {
+            background-color: #FF6347;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(162, 10, 10, 0.2);
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #A20A0A;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #A20A0A;
+        }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen">
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md p-4 flex items-center justify-between lg:hidden">
+        <div class="flex items-center gap-4">
+            <button id="menuBtn" class="text-[#A20A0A] text-xl">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800">الإعدادات</h2>
+        </div>
+        <button id="closeAppBtn" class="text-gray-500 hover:text-gray-800 text-2xl lg:hidden">
+            <i class="fas fa-times"></i>
+        </button>
+    </header>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6 h-full flex flex-col">
+            <button id="closeSidebarBtn" class="absolute top-4 left-4 text-white text-xl lg:hidden">
+                <i class="fas fa-times"></i>
+            </button>
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#C02020] pb-4">إدارة الورش</h1>
+            <nav class="space-y-3 flex-1">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-tachometer-alt text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="repairs.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الصيانة</span>
+                </a>
+                <a href="technicians.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>إدارة الفنيين</span>
+                </a>
+                <a href="accounts.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-chart-line text-lg"></i>
+                    <span>الحسابات</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#FF6347] text-[#A20A0A] font-semibold sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+            <a href="#" id="logoutBtn" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#C02020] sidebar-link mt-auto">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 lg:p-8 pt-[64px] lg:pt-8">
+        <h1 class="hidden lg:flex text-3xl font-bold text-gray-800 flex items-center gap-2 mb-6 border-b pb-4">
+            <i class="fas fa-cog accent-color"></i>
+            <span>الإعدادات</span>
+        </h1>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">إعدادات المحل</h2>
+            
+            <form id="shopSettingsForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="shopName" class="block text-sm font-medium text-gray-700 mb-1">اسم المحل</label>
+                        <input type="text" id="shopName" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="المحل السريع">
+                    </div>
+                    
+                    <div>
+                        <label for="shopAddress" class="block text-sm font-medium text-gray-700 mb-1">عنوان المحل</label>
+                        <input type="text" id="shopAddress" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="بنغازي - الحي الشمالي">
+                    </div>
+                    
+                    <div>
+                        <label for="primaryPhone" class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف الأساسي</label>
+                        <input type="tel" id="primaryPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="0912345678">
+                    </div>
+                    
+                    <div>
+                        <label for="secondaryPhone" class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف الثانوي (اختياري)</label>
+                        <input type="tel" id="secondaryPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="0922233445">
+                    </div>
+                    
+                    <div>
+                        <label for="facebookUrl" class="block text-sm font-medium text-gray-700 mb-1">رابط صفحة الفيسبوك</label>
+                        <input type="url" id="facebookUrl" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="https://facebook.com/myshop">
+                    </div>
+                    
+                    <div>
+                        <label for="locationUrl" class="block text-sm font-medium text-gray-700 mb-1">رابط الموقع الجغرافي (اختياري)</label>
+                        <input type="url" id="locationUrl" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="https://goo.gl/maps/example">
+                    </div>
+                </div>
+                
+                <div class="pt-4">
+                    <button type="submit" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                        حفظ إعدادات المحل
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">إعدادات الحساب</h2>
+            
+            <form id="passwordSettingsForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الحالية</label>
+                        <input type="password" id="currentPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" placeholder="أدخل كلمة المرور الحالية">
+                    </div>
+                    
+                    <div>
+                        <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الجديدة</label>
+                        <input type="password" id="newPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" placeholder="أدخل كلمة المرور الجديدة">
+                    </div>
+                    
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">تأكيد كلمة المرور الجديدة</label>
+                        <input type="password" id="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" placeholder="أكد كلمة المرور الجديدة">
+                    </div>
+                    
+                    <div>
+                        <label for="customerPassword" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور للعملاء</label>
+                        <input type="password" id="customerPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="customer123">
+                    </div>
+                </div>
+                
+                <div class="pt-4">
+                    <button type="submit" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                        تحديث كلمات المرور
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">إعدادات إضافية</h2>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div>
+                        <h3 class="font-medium text-gray-800">الإشعارات</h3>
+                        <p class="text-sm text-gray-600">تفعيل إشعارات البريد الإلكتروني والتطبيق</p>
+                    </div>
+                    <label for="notificationsToggle" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="notificationsToggle" class="sr-only toggle-checkbox" checked>
+                            <div class="toggle-label block w-14 h-8 rounded-full bg-gray-300"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div>
+                        <h3 class="font-medium text-gray-800">النسخ الاحتياطي التلقائي</h3>
+                        <p class="text-sm text-gray-600">إنشاء نسخة احتياطية يومية للبيانات</p>
+                    </div>
+                    <label for="backupToggle" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="backupToggle" class="sr-only toggle-checkbox" checked>
+                            <div class="toggle-label block w-14 h-8 rounded-full bg-gray-300"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div>
+                        <h3 class="font-medium text-gray-800">وضع الليل التلقائي</h3>
+                        <p class="text-sm text-gray-600">تفعيل الوضع الليلي تلقائياً في المساء</p>
+                    </div>
+                    <label for="darkModeToggle" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="darkModeToggle" class="sr-only toggle-checkbox">
+                            <div class="toggle-label block w-14 h-8 rounded-full bg-gray-300"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const closeAppBtn = document.getElementById('closeAppBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const shopSettingsForm = document.getElementById('shopSettingsForm');
+            const passwordSettingsForm = document.getElementById('passwordSettingsForm');
+
+            // وظيفة فتح/إغلاق القائمة الجانبية
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                });
+            }
+            if (closeAppBtn) {
+                closeAppBtn.addEventListener('click', () => {
+                    window.location.href = 'login.html';
+                });
+            }
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('userToken');
+                    window.location.href = 'login.html';
+                });
+            }
+
+            // تحميل إعدادات المحل من التخزين المحلي
+            function loadShopSettings() {
+                const settings = JSON.parse(localStorage.getItem('shopSettings')) || {};
+                
+                // إذا لم تكن هناك إعدادات محفوظة، نستخدم القيم الافتراضية
+                if (Object.keys(settings).length === 0) {
+                    settings.shopName = "المحل السريع";
+                    settings.shopAddress = "بنغازي - الحي الشمالي";
+                    settings.primaryPhone = "0912345678";
+                    settings.secondaryPhone = "0922233445";
+                    settings.facebookUrl = "https://facebook.com/myshop";
+                    settings.locationUrl = "https://goo.gl/maps/example";
+                    settings.customerPassword = "customer123";
+                    
+                    localStorage.setItem('shopSettings', JSON.stringify(settings));
+                }
+                
+                document.getElementById('shopName').value = settings.shopName;
+                document.getElementById('shopAddress').value = settings.shopAddress;
+                document.getElementById('primaryPhone').value = settings.primaryPhone;
+                document.getElementById('secondaryPhone').value = settings.secondaryPhone;
+                document.getElementById('facebookUrl').value = settings.facebookUrl;
+                document.getElementById('locationUrl').value = settings.locationUrl;
+                document.getElementById('customerPassword').value = settings.customerPassword;
+            }
+
+            // حفظ إعدادات المحل
+            if (shopSettingsForm) {
+                shopSettingsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const settings = {
+                        shopName: document.getElementById('shopName').value,
+                        shopAddress: document.getElementById('shopAddress').value,
+                        primaryPhone: document.getElementById('primaryPhone').value,
+                        secondaryPhone: document.getElementById('secondaryPhone').value,
+                        facebookUrl: document.getElementById('facebookUrl').value,
+                        locationUrl: document.getElementById('locationUrl').value,
+                        customerPassword: document.getElementById('customerPassword').value
+                    };
+                    
+                    localStorage.setItem('shopSettings', JSON.stringify(settings));
+                    
+                    alert('تم حفظ إعدادات المحل بنجاح!');
+                });
+            }
+
+            // تغيير كلمة المرور
+            if (passwordSettingsForm) {
+                passwordSettingsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const currentPassword = document.getElementById('currentPassword').value;
+                    const newPassword = document.getElementById('newPassword').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    const customerPassword = document.getElementById('customerPassword').value;
+                    
+                    // التحقق من صحة كلمة المرور الحالية (هنا يجب التحقق من الخادم)
+                    if (newPassword !== confirmPassword) {
+                        alert('كلمة المرور الجديدة غير متطابقة!');
+                        return;
+                    }
+                    
+                    // حفظ كلمة المرور الجديدة (هنا يجب إرسالها للخادم)
+                    const settings = JSON.parse(localStorage.getItem('shopSettings')) || {};
+                    settings.customerPassword = customerPassword;
+                    localStorage.setItem('shopSettings', JSON.stringify(settings));
+                    
+                    alert('تم تحديث كلمات المرور بنجاح!');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                });
+            }
+
+            // تحميل الإعدادات عند فتح الصفحة
+            loadShopSettings();
+        });
+    </script>
+</body>
+</html>
