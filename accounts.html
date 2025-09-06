@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الحسابات - إدارة الورش</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f3f4f6;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #A20A0A;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #C02020;
+        }
+        .accent-color {
+            color: #FF6347;
+        }
+        .bg-accent {
+            background-color: #FF6347;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(162, 10, 10, 0.2);
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #A20A0A;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #A20A0A;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .report-table th, .report-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        .report-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        .report-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen">
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md p-4 flex items-center justify-between lg:hidden">
+        <div class="flex items-center gap-4">
+            <button id="menuBtn" class="text-[#A20A0A] text-xl">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800">الحسابات</h2>
+        </div>
+        <button id="closeAppBtn" class="text-gray-500 hover:text-gray-800 text-2xl lg:hidden">
+            <i class="fas fa-times"></i>
+        </button>
+    </header>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6 h-full flex flex-col">
+            <button id="closeSidebarBtn" class="absolute top-4 left-4 text-white text-xl lg:hidden">
+                <i class="fas fa-times"></i>
+            </button>
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#C02020] pb-4">إدارة الورش</h1>
+            <nav class="space-y-3 flex-1">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-tachometer-alt text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="repairs.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الصيانة</span>
+                </a>
+                <a href="technicians.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>إدارة الفنيين</span>
+                </a>
+                <a href="accounts.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#FF6347] text-[#A20A0A] font-semibold sidebar-link">
+                    <i class="fas fa-chart-line text-lg"></i>
+                    <span>الحسابات</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+            <a href="#" id="logoutBtn" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#C02020] sidebar-link mt-auto">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 lg:p-8 pt-[64px] lg:pt-8">
+        <h1 class="hidden lg:flex text-3xl font-bold text-gray-800 flex items-center gap-2 mb-6 border-b pb-4">
+            <i class="fas fa-chart-line accent-color"></i>
+            <span>الحسابات والتقارير</span>
+        </h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">إجمالي الإيرادات</p>
+                        <h3 class="text-2xl font-bold text-gray-800">2,450 <span class="text-sm">دينار</span></h3>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-arrow-up text-green-500"></i> 12% عن الشهر الماضي</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">إجمالي التكاليف</p>
+                        <h3 class="text-2xl font-bold text-gray-800">1,220 <span class="text-sm">دينار</span></h3>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-tools text-red-600 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-arrow-up text-red-500"></i> 8% عن الشهر الماضي</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">صافي الأرباح</p>
+                        <h3 class="text-2xl font-bold text-gray-800">1,230 <span class="text-sm">دينار</span></h3>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-arrow-up text-green-500"></i> 15% عن الشهر الماضي</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm">عدد الصيانات</p>
+                        <h3 class="text-2xl font-bold text-gray-800">42</h3>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-cogs text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-arrow-up text-green-500"></i> 5 عن الشهر الماضي</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-700">التقارير المالية</h2>
+                <div class="flex gap-2 mt-4 md:mt-0">
+                    <select id="reportPeriod" class="px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]">
+                        <option value="today">اليوم</option>
+                        <option value="week" selected>هذا الأسبوع</option>
+                        <option value="month">هذا الشهر</option>
+                        <option value="year">هذه السنة</option>
+                        <option value="custom">فترة مخصصة</option>
+                    </select>
+                    <button id="printReportBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                        <i class="fas fa-print"></i> طباعة
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <canvas id="revenueChart" height="250"></canvas>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <canvas id="repairsChart" height="250"></canvas>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="report-table w-full">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>عدد الصيانات</th>
+                            <th>إجمالي الإيرادات</th>
+                            <th>تكاليف القطع</th>
+                            <th>أجور الفنيين</th>
+                            <th>صافي الربح</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>الأحد 15 ديسمبر</td>
+                            <td>8</td>
+                            <td>560 دينار</td>
+                            <td>240 دينار</td>
+                            <td>120 دينار</td>
+                            <td>200 دينار</td>
+                        </tr>
+                        <tr>
+                            <td>السبت 14 ديسمبر</td>
+                            <td>6</td>
+                            <td>420 دينار</td>
+                            <td>180 دينار</td>
+                            <td>90 دينار</td>
+                            <td>150 دينار</td>
+                        </tr>
+                        <tr>
+                            <td>الجمعة 13 ديسمبر</td>
+                            <td>7</td>
+                            <td>490 دينار</td>
+                            <td>210 دينار</td>
+                            <td>105 دينار</td>
+                            <td>175 دينار</td>
+                        </tr>
+                        <tr>
+                            <td>الخميس 12 ديسمبر</td>
+                            <td>5</td>
+                            <td>350 دينار</td>
+                            <td>150 دينار</td>
+                            <td>75 دينار</td>
+                            <td>125 دينار</td>
+                        </tr>
+                        <tr>
+                            <td>الأربعاء 11 ديسمبر</td>
+                            <td>9</td>
+                            <td>630 دينار</td>
+                            <td>270 دينار</td>
+                            <td>135 دينار</td>
+                            <td>225 دينار</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="font-bold bg-gray-100">
+                            <td>المجموع</td>
+                            <td>35</td>
+                            <td>2,450 دينار</td>
+                            <td>1,050 دينار</td>
+                            <td>525 دينار</td>
+                            <td>875 دينار</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">تقرير الفنيين</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="report-table w-full">
+                    <thead>
+                        <tr>
+                            <th>اسم الفني</th>
+                            <th>عدد الصيانات</th>
+                            <th>إجمالي الإيرادات</th>
+                            <th>نسبة/راتب الفني</th>
+                            <th>صافي ربح المحل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>أحمد محمد</td>
+                            <td>15</td>
+                            <td>1,050 دينار</td>
+                            <td>315 دينار (30%)</td>
+                            <td>735 دينار</td>
+                        </tr>
+                        <tr>
+                            <td>محمد علي</td>
+                            <td>12</td>
+                            <td>840 دينار</td>
+                            <td>252 دينار (30%)</td>
+                            <td>588 دينار</td>
+                        </tr>
+                        <tr>
+                            <td>خالد عبدالله</td>
+                            <td>8</td>
+                            <td>560 دينار</td>
+                            <td>300 دينار (راتب ثابت)</td>
+                            <td>260 دينار</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">إغلاق اليوم</h2>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-yellow-500 text-xl mt-1"></i>
+                    </div>
+                    <div class="mr-3">
+                        <h3 class="text-lg font-medium text-yellow-800">ملاحظة مهمة</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <p>عند الضغط على زر "إغلاق اليوم"، سيتم إنشاء تقرير نهائي لليوم وجميع البيانات الحالية سيتم أرشفتها.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-lg text-gray-800 mb-4">ملخص اليوم</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">عدد الأجهزة المستلمة:</span>
+                            <span class="font-medium">8</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">عدد الأجهزة المنتهية:</span>
+                            <span class="font-medium">6</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">إجمالي المبالغ المدفوعة:</span>
+                            <span class="font-medium">560 دينار</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">إجمالي تكلفة القطع:</span>
+                            <span class="font-medium">240 دينار</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">إجمالي أجور الفنيين:</span>
+                            <span class="font-medium">120 دينار</span>
+                        </div>
+                        <div class="flex justify-between border-t border-gray-300 pt-2 mt-2">
+                            <span class="text-gray-800 font-bold">صافي الأرباح:</span>
+                            <span class="text-green-600 font-bold">200 دينار</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-lg text-gray-800 mb-4">توزيع الأرباح على الفنيين</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">أحمد محمد:</span>
+                            <span class="font-medium">90 دينار (6 صيانات)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">محمد علي:</span>
+                            <span class="font-medium">72 دينار (5 صيانات)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">خالد عبدالله:</span>
+                            <span class="font-medium">300 دينار (راتب ثابت)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button id="closeDayBtn" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200 flex items-center gap-2">
+                    <i class="fas fa-lock"></i> إغلاق اليوم
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const closeAppBtn = document.getElementById('closeAppBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const closeDayBtn = document.getElementById('closeDayBtn');
+            const printReportBtn = document.getElementById('printReportBtn');
+
+            // وظيفة فتح/إغلاق القائمة الجانبية
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                });
+            }
+            if (closeAppBtn) {
+                closeAppBtn.addEventListener('click', () => {
+                    window.location.href = 'login.html';
+                });
+            }
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('userToken');
+                    window.location.href = 'login.html';
+                });
+            }
+
+            // إغلاق اليوم
+            if (closeDayBtn) {
+                closeDayBtn.addEventListener('click', () => {
+                    if (confirm('هل أنت متأكد من إغلاق اليوم؟ لا يمكن التراجع عن هذه العملية.')) {
+                        // هنا سيتم إرسال البيانات إلى الخادم وحفظها
+                        alert('تم إغلاق اليوم بنجاح وتم حفظ التقرير.');
+                    }
+                });
+            }
+
+            // طباعة التقرير
+            if (printReportBtn) {
+                printReportBtn.addEventListener('click', () => {
+                    window.print();
+                });
+            }
+
+            // إنشاء الرسوم البيانية
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            const revenueChart = new Chart(revenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['الأحد', 'السبت', 'الجمعة', 'الخميس', 'الأربعاء'],
+                    datasets: [
+                        {
+                            label: 'الإيرادات',
+                            data: [560, 420, 490, 350, 630],
+                            backgroundColor: '#A20A0A',
+                            borderColor: '#A20A0A',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'الأرباح',
+                            data: [200, 150, 175, 125, 225],
+                            backgroundColor: '#10B981',
+                            borderColor: '#10B981',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'الإيرادات والأرباح اليومية',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'المبلغ (دينار)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const repairsCtx = document.getElementById('repairsChart').getContext('2d');
+            const repairsChart = new Chart(repairsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['أحمد محمد', 'محمد علي', 'خالد عبدالله'],
+                    datasets: [{
+                        label: 'توزيع الصيانات',
+                        data: [15, 12, 8],
+                        backgroundColor: [
+                            '#A20A0A',
+                            '#FF6347',
+                            '#F59E0B'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'توزيع الصيانات على الفنيين',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+
+            // تغيير الفترة الزمنية للتقرير
+            const reportPeriod = document.getElementById('reportPeriod');
+            if (reportPeriod) {
+                reportPeriod.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        // هنا يمكن إضافة منطق لاختيار تاريخ مخصص
+                        alert('سيتم إضافة خاصية اختيار فترة مخصصة قريباً');
+                        this.value = 'week';
+                    } else {
+                        // هنا سيتم تحميل البيانات حسب الفترة المحددة
+                        loadReportData(this.value);
+                    }
+                });
+            }
+
+            // دالة تحميل بيانات التقرير (ستكون متصلة بالخادم في التطبيق الحقيقي)
+            function loadReportData(period) {
+                console.log('جارٍ تحميل البيانات للفترة: ' + period);
+                // في التطبيق الحقيقي، هنا سيتم جلب البيانات من الخادم
+            }
+        });
+    </script>
+</body>
+</html>

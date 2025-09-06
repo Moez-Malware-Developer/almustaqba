@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إدارة الصيانة - إدارة الورش</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f3f4f6;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #A20A0A;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #C02020;
+        }
+        .accent-color {
+            color: #A20A0A;
+        }
+        .bg-accent {
+            background-color: #A20A0A;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(162, 10, 10, 0.2);
+        }
+        .tab-button.active {
+            border-bottom: 2px solid #A20A0A;
+            color: #A20A0A;
+            font-weight: 600;
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receipt-modal-content, #receipt-modal-content * {
+                visibility: visible;
+            }
+            #receipt-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: none;
+                display: block;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen">
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md p-4 flex items-center justify-between lg:hidden">
+        <div class="flex items-center gap-4">
+            <button id="menuBtn" class="text-[#A20A0A] text-xl">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800">إدارة الصيانة</h2>
+        </div>
+        <button id="closeAppBtn" class="text-gray-500 hover:text-gray-800 text-2xl lg:hidden">
+            <i class="fas fa-times"></i>
+        </button>
+    </header>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6 h-full flex flex-col">
+            <button id="closeSidebarBtn" class="absolute top-4 left-4 text-white text-xl lg:hidden">
+                <i class="fas fa-times"></i>
+            </button>
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#C02020] pb-4">إدارة الورش</h1>
+            <nav class="space-y-3 flex-1">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-tachometer-alt text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="repairs.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#FF6347] text-[#A20A0A] font-semibold sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الصيانة</span>
+                </a>
+                <a href="technicians.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>إدارة الفنيين</span>
+                </a>
+                <a href="accounts.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-chart-line text-lg"></i>
+                    <span>الحسابات</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+            <a href="#" id="logoutBtn" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#C02020] sidebar-link mt-auto">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 lg:p-8 pt-[64px] lg:pt-8">
+        <h1 class="hidden lg:flex text-3xl font-bold text-gray-800 flex items-center gap-2 mb-6 border-b pb-4">
+            <i class="fas fa-boxes accent-color"></i>
+            <span>إدارة الصيانة</span>
+        </h1>
+
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+            <div class="flex border-b border-gray-200">
+                <button class="flex-1 py-4 text-center text-gray-600 tab-button active" data-tab="new-repair">
+                    استلام جهاز جديد
+                </button>
+                <button class="flex-1 py-4 text-center text-gray-600 tab-button" data-tab="received-devices">
+                    قائمة الأجهزة المستلمة
+                </button>
+                <button class="flex-1 py-4 text-center text-gray-600 tab-button" data-tab="track-repair">
+                    متابعة حالة الجهاز
+                </button>
+                <button class="flex-1 py-4 text-center text-gray-600 tab-button" data-tab="finish-repair" style="display: none;">
+                    إنهاء الصيانة
+                </button>
+            </div>
+        </div>
+
+        <div id="new-repair-section" class="tab-content bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">استلام جهاز جديد</h2>
+            <form id="newRepairForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">اسم الزبون <span class="text-red-500">*</span></label>
+                        <input type="text" id="customerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                    </div>
+                    <div>
+                        <label for="customerPhone" class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف <span class="text-red-500">*</span></label>
+                        <input type="tel" id="customerPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                    </div>
+                    <div>
+                        <label for="deviceType" class="block text-sm font-medium text-gray-700 mb-1">نوع الجهاز <span class="text-red-500">*</span></label>
+                        <input type="text" id="deviceType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                    </div>
+                    <div>
+                        <label for="faultType" class="block text-sm font-medium text-gray-700 mb-1">نوع العطل <span class="text-red-500">*</span></label>
+                        <input type="text" id="faultType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                    </div>
+                    <div>
+                        <label for="agreedPrice" class="block text-sm font-medium text-gray-700 mb-1">السعر المتفق عليه <span class="text-red-500">*</span></label>
+                        <input type="number" id="agreedPrice" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                    </div>
+                    <div>
+                        <label for="advancePayment" class="block text-sm font-medium text-gray-700 mb-1">المبلغ المدفوع مقدماً</label>
+                        <input type="number" id="advancePayment" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="0">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="additionalNotes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات إضافية</label>
+                        <textarea id="additionalNotes" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-between items-center">
+                    <button type="submit" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                        <i class="fas fa-plus ml-2"></i> حفظ واستلام الجهاز
+                    </button>
+                    <button type="button" id="printReceiptBtn" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 hidden">
+                        <i class="fas fa-print ml-2"></i> طباعة إيصال
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="received-devices-section" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">قائمة الأجهزة المستلمة</h2>
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    رقم الإيصال
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الزبون
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الجهاز
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الإجراءات
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="receivedRepairsTableBody" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="track-repair-section" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">متابعة حالة الجهاز</h2>
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="relative flex-1 w-full md:w-auto">
+                        <input type="text" id="searchInput" class="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" placeholder="ابحث باسم الزبون، رقم الهاتف أو رقم الإيصال...">
+                        <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <button id="scanQRBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                        <i class="fas fa-qrcode ml-2"></i> مسح QR Code
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    رقم الإيصال
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الزبون
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الفني
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الجهاز
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الحالة
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    تاريخ الاستلام
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الإجراءات
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="repairsTableBody" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="finish-repair-section" class="tab-content hidden bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">إنهاء الصيانة</h2>
+            <form id="finishRepairForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="finishCustomerName" class="block text-sm font-medium text-gray-700 mb-1">اسم الزبون</label>
+                        <input type="text" id="finishCustomerName" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg form-input" readonly>
+                    </div>
+                    <div>
+                        <label for="finishDeviceType" class="block text-sm font-medium text-gray-700 mb-1">نوع الجهاز</label>
+                        <input type="text" id="finishDeviceType" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg form-input" readonly>
+                    </div>
+                    <div>
+                        <label for="finishAgreedPrice" class="block text-sm font-medium text-gray-700 mb-1">السعر المتفق عليه</label>
+                        <input type="number" id="finishAgreedPrice" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg form-input" readonly>
+                    </div>
+                    <div>
+                        <label for="finishAdvancePayment" class="block text-sm font-medium text-gray-700 mb-1">المبلغ المدفوع مقدماً</label>
+                        <input type="number" id="finishAdvancePayment" class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg form-input" readonly>
+                    </div>
+                    <div>
+                        <label for="partsCost" class="block text-sm font-medium text-gray-700 mb-1">تكلفة القطعة/القطع المستخدمة <span class="text-red-500">*</span></label>
+                        <input type="number" id="partsCost" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" value="0" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="profit" class="block text-sm font-medium text-gray-700 mb-1">ربح المحل</label>
+                        <input type="text" id="profit" class="w-full px-4 py-2 bg-gray-100 font-bold border border-gray-300 rounded-lg form-input" readonly>
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-between items-center">
+                    <button type="submit" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                        <i class="fas fa-check ml-2"></i> إنهاء الصيانة
+                    </button>
+                    <button type="button" id="cancelFinishBtn" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200">
+                        <i class="fas fa-times ml-2"></i> إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <div id="receipt-modal" class="modal fixed inset-0 flex items-center justify-center z-[100] hidden">
+        <div id="receipt-modal-content" class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-sm mx-auto p-6 relative print:p-0 print:m-0 print:shadow-none">
+            <button id="closeReceiptModal" class="no-print absolute top-4 left-4 text-gray-500 hover:text-gray-700 text-2xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="receipt-container" class="text-center font-tajawal">
+                <h2 class="text-3xl font-bold text-[#A20A0A] mb-4">إيصال استلام</h2>
+                <div class="border-t border-b border-gray-300 py-4 mb-4">
+                    <p class="text-sm text-gray-600 mb-2">اسم المحل: <span id="shop-name" class="font-semibold text-gray-800"></span></p>
+                    <p class="text-sm text-gray-600 mb-2">رقم الهاتف: <span id="shop-phone" class="font-semibold text-gray-800"></span></p>
+                    <p class="text-sm text-gray-600">العنوان: <span id="shop-address" class="font-semibold text-gray-800"></span></p>
+                </div>
+                <div class="text-right text-gray-700 mb-4">
+                    <p class="text-sm mb-1">رقم الإيصال: <span id="receipt-id" class="font-semibold"></span></p>
+                    <p class="text-sm mb-1">تاريخ: <span id="receipt-date" class="font-semibold"></span></p>
+                    <p class="text-sm mb-1">اسم الزبون: <span id="receipt-customer-name" class="font-semibold"></span></p>
+                    <p class="text-sm mb-1">رقم الهاتف: <span id="receipt-customer-phone" class="font-semibold"></span></p>
+                    <p class="text-sm mb-1">نوع الجهاز: <span id="receipt-device-type" class="font-semibold"></span></p>
+                    <p class="text-sm mb-1">نوع العطل: <span id="receipt-fault-type" class="font-semibold"></span></p>
+                    <p class="text-sm mb-1">السعر المتفق عليه: <span id="receipt-agreed-price" class="font-semibold"></span> د.ل</p>
+                    <p class="text-sm mb-1">المبلغ المدفوع: <span id="receipt-advance-payment" class="font-semibold"></span> د.ل</p>
+                    <p class="text-sm">المبلغ المتبقي: <span id="receipt-remaining-amount" class="font-semibold"></span> د.ل</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-4 border border-gray-300 rounded-lg">
+                    <p class="text-xs text-gray-500 mb-2">امسح الكود لتتبع حالة جهازك</p>
+                    <div id="qrcode-container" class="w-32 h-32"></div>
+                </div>
+                <p class="text-xs text-center text-gray-500 mt-4">شكراً لثقتكم بنا!</p>
+            </div>
+            <div class="no-print mt-6 flex justify-center space-x-4 space-x-reverse">
+                <button id="printReceipt" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                    <i class="fas fa-print ml-2"></i> طباعة
+                </button>
+                <button id="closeReceipt" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200">
+                    <i class="fas fa-times ml-2"></i> إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="assign-tech-modal" class="modal fixed inset-0 flex items-center justify-center z-[100] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-auto p-6 relative">
+            <button id="closeAssignTechModal" class="absolute top-4 left-4 text-gray-500 hover:text-gray-700 text-2xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-2xl font-bold text-gray-700 mb-4 text-center">تعيين فني</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="assignTechSelect" class="block text-sm font-medium text-gray-700 mb-1">اختيار فني</label>
+                    <select id="assignTechSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]">
+                        <option value="">اختر فني</option>
+                        </select>
+                </div>
+                <div class="flex justify-center pt-4">
+                    <button id="confirmAssignBtn" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                        <i class="fas fa-check ml-2"></i> تأكيد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const closeAppBtn = document.getElementById('closeAppBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const receivedRepairsTableBody = document.getElementById('receivedRepairsTableBody');
+            const repairsTableBody = document.getElementById('repairsTableBody');
+            const searchInput = document.getElementById('searchInput');
+
+            const newRepairForm = document.getElementById('newRepairForm');
+            const finishRepairForm = document.getElementById('finishRepairForm');
+            const cancelFinishBtn = document.getElementById('cancelFinishBtn');
+
+            const receiptModal = document.getElementById('receipt-modal');
+            const closeReceiptModalBtn = document.getElementById('closeReceiptModal');
+            const printReceiptBtnInModal = document.getElementById('printReceipt');
+            const closeReceiptBtnInModal = document.getElementById('closeReceipt');
+            const qrcodeContainer = document.getElementById('qrcode-container');
+
+            const assignTechModal = document.getElementById('assign-tech-modal');
+            const closeAssignTechModalBtn = document.getElementById('closeAssignTechModal');
+            const assignTechSelect = document.getElementById('assignTechSelect');
+            const confirmAssignBtn = document.getElementById('confirmAssignBtn');
+
+            let currentRepairId = null;
+
+            // Load initial data
+            loadRepairs();
+            loadTechnicians();
+
+            // Sidebar and navigation functionality
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+            closeSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+            });
+            closeAppBtn.addEventListener('click', () => {
+                window.location.href = 'login.html';
+            });
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('userToken');
+                window.location.href = 'login.html';
+            });
+
+            // Tab switching logic
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    document.getElementById(button.dataset.tab + '-section').classList.remove('hidden');
+                    loadRepairs();
+                });
+            });
+
+            // Form submission for new repair
+            newRepairForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const newRepair = {
+                    id: Date.now(),
+                    customerName: document.getElementById('customerName').value,
+                    customerPhone: document.getElementById('customerPhone').value,
+                    deviceType: document.getElementById('deviceType').value,
+                    faultType: document.getElementById('faultType').value,
+                    agreedPrice: parseFloat(document.getElementById('agreedPrice').value),
+                    advancePayment: parseFloat(document.getElementById('advancePayment').value),
+                    technicianId: null, // Initially no technician assigned
+                    additionalNotes: document.getElementById('additionalNotes').value,
+                    status: 'استلام',
+                    date: new Date().toLocaleDateString('ar-SA')
+                };
+
+                saveRepair(newRepair);
+                newRepairForm.reset();
+                
+                generateReceipt(newRepair);
+                loadRepairs(); // Refresh the repair lists
+            });
+
+            // Generate and display receipt with QR code
+            function generateReceipt(repair) {
+                // Load shop settings for the receipt header
+                const shopSettings = JSON.parse(localStorage.getItem('shopSettings')) || {
+                    shopName: "إدارة الورش",
+                    primaryPhone: "غير محدد",
+                    shopAddress: "غير محدد"
+                };
+
+                document.getElementById('shop-name').textContent = shopSettings.shopName;
+                document.getElementById('shop-phone').textContent = shopSettings.primaryPhone;
+                document.getElementById('shop-address').textContent = shopSettings.shopAddress;
+                
+                // Populate receipt details
+                document.getElementById('receipt-id').textContent = repair.id;
+                document.getElementById('receipt-date').textContent = repair.date;
+                document.getElementById('receipt-customer-name').textContent = repair.customerName;
+                document.getElementById('receipt-customer-phone').textContent = repair.customerPhone;
+                document.getElementById('receipt-device-type').textContent = repair.deviceType;
+                document.getElementById('receipt-fault-type').textContent = repair.faultType;
+                document.getElementById('receipt-agreed-price').textContent = repair.agreedPrice;
+                document.getElementById('receipt-advance-payment').textContent = repair.advancePayment;
+                const remaining = repair.agreedPrice - repair.advancePayment;
+                document.getElementById('receipt-remaining-amount').textContent = remaining > 0 ? remaining : 0;
+                
+                // Generate QR code
+                qrcodeContainer.innerHTML = '';
+                new QRCode(qrcodeContainer, {
+                    text: `http://localhost/track?id=${repair.id}`, // Example URL for tracking
+                    width: 128,
+                    height: 128
+                });
+                
+                receiptModal.classList.remove('hidden');
+            }
+
+            closeReceiptModalBtn.addEventListener('click', () => {
+                receiptModal.classList.add('hidden');
+            });
+            closeReceiptBtnInModal.addEventListener('click', () => {
+                receiptModal.classList.add('hidden');
+            });
+
+            printReceiptBtnInModal.addEventListener('click', () => {
+                window.print();
+            });
+
+            // Save repair to localStorage
+            function saveRepair(repair) {
+                const repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                repairs.push(repair);
+                localStorage.setItem('repairs', JSON.stringify(repairs));
+            }
+
+            // Load and display repairs in the table
+            function loadRepairs(filter = '') {
+                const repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                receivedRepairsTableBody.innerHTML = '';
+                repairsTableBody.innerHTML = '';
+
+                const technicians = JSON.parse(localStorage.getItem('technicians')) || [];
+                const getTechnicianName = (id) => {
+                    const tech = technicians.find(t => t.id === id);
+                    return tech ? tech.name : 'غير محدد';
+                };
+
+                const filteredRepairs = repairs.filter(repair => 
+                    repair.customerName.includes(filter) ||
+                    repair.customerPhone.includes(filter) ||
+                    repair.id.toString().includes(filter)
+                );
+
+                const receivedRepairs = filteredRepairs.filter(repair => repair.status === 'استلام');
+                const inProgressRepairs = filteredRepairs.filter(repair => repair.status !== 'استلام');
+
+                // Populate Received Devices table
+                if (receivedRepairs.length === 0) {
+                    receivedRepairsTableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">لا توجد أجهزة مستلمة.</td></tr>`;
+                } else {
+                    receivedRepairs.forEach(repair => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-50 transition-colors duration-150';
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.id}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${repair.customerName}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.deviceType}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <button data-id="${repair.id}" class="assign-tech-btn bg-[#A20A0A] text-white px-4 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                                    تعيين فني
+                                </button>
+                            </td>
+                        `;
+                        receivedRepairsTableBody.appendChild(row);
+                    });
+                }
+                
+                // Populate In-Progress & Finished Repairs table
+                if (inProgressRepairs.length === 0) {
+                    repairsTableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">لا توجد إصلاحات قيد المتابعة.</td></tr>`;
+                } else {
+                    inProgressRepairs.forEach(repair => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-50 transition-colors duration-150';
+                        let statusColor = '';
+                        switch (repair.status) {
+                            case 'جاري الصيانة':
+                                statusColor = 'bg-yellow-200 text-yellow-800';
+                                break;
+                            case 'تم الانتهاء':
+                                statusColor = 'bg-green-200 text-green-800';
+                                break;
+                        }
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.id}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${repair.customerName}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${getTechnicianName(repair.technicianId)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.deviceType}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">${repair.status}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.date}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <div class="flex items-center justify-center space-x-2 space-x-reverse">
+                                    ${repair.status === 'جاري الصيانة' ? `
+                                    <button data-id="${repair.id}" data-status="تم الانتهاء" class="finish-btn text-green-600 hover:text-green-900 transition-colors duration-150" title="إنهاء الصيانة">
+                                        <i class="fas fa-check-circle text-lg"></i>
+                                    </button>
+                                    ` : `
+                                    <span class="text-gray-400" title="تم إنهاء الصيانة"><i class="fas fa-check-circle text-lg"></i></span>
+                                    `}
+                                </div>
+                            </td>
+                        `;
+                        repairsTableBody.appendChild(row);
+                    });
+                }
+                attachButtonListeners();
+            }
+
+            // Load technicians for the dropdowns
+            function loadTechnicians() {
+                const technicians = JSON.parse(localStorage.getItem('technicians')) || [];
+                assignTechSelect.innerHTML = '<option value="">اختر فني</option>';
+                technicians.forEach(tech => {
+                    const option = document.createElement('option');
+                    option.value = tech.id;
+                    option.textContent = tech.name;
+                    assignTechSelect.appendChild(option);
+                });
+            }
+
+            // Handle button clicks for assigning tech and finishing repair
+            function attachButtonListeners() {
+                document.querySelectorAll('.assign-tech-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        currentRepairId = parseInt(e.currentTarget.dataset.id);
+                        assignTechModal.classList.remove('hidden');
+                    });
+                });
+
+                document.querySelectorAll('.finish-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        currentRepairId = parseInt(e.currentTarget.dataset.id);
+                        let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                        const repair = repairs.find(r => r.id === currentRepairId);
+                        
+                        document.getElementById('finishCustomerName').value = repair.customerName;
+                        document.getElementById('finishDeviceType').value = repair.deviceType;
+                        document.getElementById('finishAgreedPrice').value = repair.agreedPrice;
+                        document.getElementById('finishAdvancePayment').value = repair.advancePayment;
+                        document.querySelector('[data-tab="finish-repair"]').click();
+                        calculateProfit();
+                    });
+                });
+            }
+
+            // Assign technician from modal
+            confirmAssignBtn.addEventListener('click', () => {
+                const technicianId = assignTechSelect.value;
+                if (!technicianId) {
+                    alert('الرجاء اختيار فني أولاً.');
+                    return;
+                }
+
+                let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                const repairIndex = repairs.findIndex(r => r.id === currentRepairId);
+
+                if (repairIndex > -1) {
+                    repairs[repairIndex].technicianId = technicianId;
+                    repairs[repairIndex].status = 'جاري الصيانة';
+                    localStorage.setItem('repairs', JSON.stringify(repairs));
+                    assignTechModal.classList.add('hidden');
+                    loadRepairs();
+                    document.querySelector('[data-tab="track-repair"]').click();
+                }
+            });
+
+            closeAssignTechModalBtn.addEventListener('click', () => {
+                assignTechModal.classList.add('hidden');
+            });
+
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+                const filterValue = e.target.value;
+                loadRepairs(filterValue);
+            });
+
+            // Finish Repair Form Logic
+            function calculateProfit() {
+                const agreedPrice = parseFloat(document.getElementById('finishAgreedPrice').value) || 0;
+                const partsCost = parseFloat(document.getElementById('partsCost').value) || 0;
+                const profit = agreedPrice - partsCost;
+                document.getElementById('profit').value = profit.toFixed(2) + ' د.ل.';
+            }
+
+            document.getElementById('partsCost').addEventListener('input', calculateProfit);
+            
+            finishRepairForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const partsCost = parseFloat(document.getElementById('partsCost').value);
+                const agreedPrice = parseFloat(document.getElementById('finishAgreedPrice').value);
+                
+                if (isNaN(partsCost) || isNaN(agreedPrice)) {
+                    alert('الرجاء إدخال أرقام صحيحة لتكلفة القطع.');
+                    return;
+                }
+                
+                let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                const repairIndex = repairs.findIndex(r => r.id === currentRepairId);
+                
+                if (repairIndex > -1) {
+                    repairs[repairIndex].status = 'تم الانتهاء';
+                    repairs[repairIndex].partsCost = partsCost;
+                    repairs[repairIndex].profit = agreedPrice - partsCost;
+                    localStorage.setItem('repairs', JSON.stringify(repairs));
+                    
+                    alert('تم إنهاء الصيانة وحساب الأرباح بنجاح!');
+                    finishRepairForm.reset();
+                    loadRepairs(); // Refresh the lists
+                    document.querySelector('[data-tab="track-repair"]').click();
+                }
+            });
+            
+            cancelFinishBtn.addEventListener('click', () => {
+                finishRepairForm.reset();
+                document.querySelector('[data-tab="track-repair"]').click();
+            });
+
+            // Initial load of repairs
+            loadRepairs();
+        });
+    </script>
+</body>
+</html>

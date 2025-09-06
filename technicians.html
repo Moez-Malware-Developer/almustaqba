@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إدارة الفنيين - إدارة الورش</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f3f4f6;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            background-color: #A20A0A;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(100%);
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: #C02020;
+        }
+        .accent-color {
+            color: #FF6347;
+        }
+        .bg-accent {
+            background-color: #FF6347;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(162, 10, 10, 0.2);
+        }
+        .agreement-type {
+            display: none;
+        }
+        .agreement-type.active {
+            display: block;
+        }
+        .technician-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .technician-table th, .technician-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .technician-table th {
+            background-color: #f9fafb;
+            font-weight: 700;
+        }
+        .technician-table tr:hover {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen">
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md p-4 flex items-center justify-between lg:hidden">
+        <div class="flex items-center gap-4">
+            <button id="menuBtn" class="text-[#A20A0A] text-xl">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800">إدارة الفنيين</h2>
+        </div>
+        <button id="closeAppBtn" class="text-gray-500 hover:text-gray-800 text-2xl lg:hidden">
+            <i class="fas fa-times"></i>
+        </button>
+    </header>
+
+    <aside id="sidebar" class="fixed inset-y-0 right-0 z-50 w-64 text-white shadow-lg lg:relative lg:translate-x-0 transform">
+        <div class="p-6 h-full flex flex-col">
+            <button id="closeSidebarBtn" class="absolute top-4 left-4 text-white text-xl lg:hidden">
+                <i class="fas fa-times"></i>
+            </button>
+            <h1 class="text-3xl font-bold mb-8 text-center border-b border-[#C02020] pb-4">إدارة الورش</h1>
+            <nav class="space-y-3 flex-1">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-tachometer-alt text-lg"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="repairs.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-boxes text-lg"></i>
+                    <span>إدارة الصيانة</span>
+                </a>
+                <a href="technicians.html" class="flex items-center gap-4 p-3 rounded-lg bg-[#FF6347] text-[#A20A0A] font-semibold sidebar-link">
+                    <i class="fas fa-users-cog text-lg"></i>
+                    <span>إدارة الفنيين</span>
+                </a>
+                <a href="accounts.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-chart-line text-lg"></i>
+                    <span>الحسابات</span>
+                </a>
+                <a href="settings.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-[#C02020] sidebar-link">
+                    <i class="fas fa-cog text-lg"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+            <a href="#" id="logoutBtn" class="flex items-center gap-4 p-3 rounded-lg text-red-300 hover:text-red-100 hover:bg-[#C02020] sidebar-link mt-auto">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 lg:p-8 pt-[64px] lg:pt-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-users-cog accent-color"></i>
+                <span>إدارة الفنيين</span>
+            </h1>
+            <button id="addTechnicianBtn" class="bg-[#A20A0A] text-white px-4 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200 mt-4 md:mt-0">
+                <i class="fas fa-plus-circle ml-2"></i>
+                إضافة فني جديد
+            </button>
+        </div>
+
+        <!-- نموذج إضافة/تعديل الفني -->
+        <div id="technicianFormModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-3/4 lg:w-2/3 max-h-screen overflow-y-auto">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800" id="formTitle">إضافة فني جديد</h2>
+                </div>
+                <form id="technicianForm" class="p-6 space-y-4">
+                    <input type="hidden" id="technicianId">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                            <input type="text" id="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                            <input type="tel" id="phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                        </div>
+                        <div>
+                            <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1">الجنسية</label>
+                            <input type="text" id="nationality" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                        </div>
+                        <div>
+                            <label for="agreementType" class="block text-sm font-medium text-gray-700 mb-1">نوع الاتفاق</label>
+                            <select id="agreementType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                                <option value="">اختر نوع الاتفاق</option>
+                                <option value="percentage">نسبة</option>
+                                <option value="salary">راتب ثابت</option>
+                            </select>
+                        </div>
+                        <div id="percentageField" class="agreement-type">
+                            <label for="percentage" class="block text-sm font-medium text-gray-700 mb-1">النسبة %</label>
+                            <input type="number" id="percentage" min="0" max="100" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]">
+                        </div>
+                        <div id="salaryField" class="agreement-type">
+                            <label for="salary" class="block text-sm font-medium text-gray-700 mb-1">الراتب الشهري</label>
+                            <input type="number" id="salary" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-2 space-x-reverse pt-4">
+                        <button type="button" id="cancelForm" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+                            إلغاء
+                        </button>
+                        <button type="submit" class="bg-[#A20A0A] text-white px-4 py-2 rounded-lg hover:bg-[#C02020]">
+                            حفظ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- جدول عرض الفنيين -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-700">قائمة الفنيين</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="technician-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم الكامل</th>
+                            <th>رقم الهاتف</th>
+                            <th>الجنسية</th>
+                            <th>نوع الاتفاق</th>
+                            <th>القيمة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="techniciansList">
+                        <!-- سيتم ملء هذا القسم بالبيانات من JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // عناصر DOM
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const closeAppBtn = document.getElementById('closeAppBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const addTechnicianBtn = document.getElementById('addTechnicianBtn');
+            const technicianFormModal = document.getElementById('technicianFormModal');
+            const technicianForm = document.getElementById('technicianForm');
+            const cancelForm = document.getElementById('cancelForm');
+            const agreementType = document.getElementById('agreementType');
+            const percentageField = document.getElementById('percentageField');
+            const salaryField = document.getElementById('salaryField');
+            const techniciansList = document.getElementById('techniciansList');
+            const formTitle = document.getElementById('formTitle');
+
+            // بيانات الفنيين (سيتم استبدالها بقاعدة بيانات حقيقية)
+            let technicians = JSON.parse(localStorage.getItem('technicians')) || [];
+
+            // وظيفة فتح/إغلاق القائمة الجانبية
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                });
+            }
+            if (closeAppBtn) {
+                closeAppBtn.addEventListener('click', () => {
+                    window.location.href = 'login.html';
+                });
+            }
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('userToken');
+                    window.location.href = 'login.html';
+                });
+            }
+
+            // إظهار/إخفاء الحقول حسب نوع الاتفاق
+            agreementType.addEventListener('change', () => {
+                const type = agreementType.value;
+                percentageField.classList.remove('active');
+                salaryField.classList.remove('active');
+                
+                if (type === 'percentage') {
+                    percentageField.classList.add('active');
+                } else if (type === 'salary') {
+                    salaryField.classList.add('active');
+                }
+            });
+
+            // فتح نموذج إضافة فني جديد
+            addTechnicianBtn.addEventListener('click', () => {
+                formTitle.textContent = 'إضافة فني جديد';
+                technicianForm.reset();
+                document.getElementById('technicianId').value = '';
+                agreementType.dispatchEvent(new Event('change'));
+                technicianFormModal.classList.remove('hidden');
+            });
+
+            // إغلاق النموذج
+            cancelForm.addEventListener('click', () => {
+                technicianFormModal.classList.add('hidden');
+            });
+
+            // إرسال نموذج الفني
+            technicianForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const technicianId = document.getElementById('technicianId').value;
+                const fullName = document.getElementById('fullName').value;
+                const phone = document.getElementById('phone').value;
+                const nationality = document.getElementById('nationality').value;
+                const agreementTypeValue = document.getElementById('agreementType').value;
+                const percentage = document.getElementById('percentage').value;
+                const salary = document.getElementById('salary').value;
+                
+                const technicianData = {
+                    fullName,
+                    phone,
+                    nationality,
+                    agreementType: agreementTypeValue,
+                    percentage: agreementTypeValue === 'percentage' ? percentage : null,
+                    salary: agreementTypeValue === 'salary' ? salary : null
+                };
+                
+                if (technicianId) {
+                    // تعديل الفني الموجود
+                    technicians = technicians.map(tech => 
+                        tech.id === technicianId ? { ...technicianData, id: technicianId } : tech
+                    );
+                } else {
+                    // إضافة فني جديد
+                    technicianData.id = Date.now().toString();
+                    technicians.push(technicianData);
+                }
+                
+                // حفظ البيانات
+                localStorage.setItem('technicians', JSON.stringify(technicians));
+                
+                // تحديث الواجهة
+                renderTechnicians();
+                
+                // إغلاق النموذج
+                technicianFormModal.classList.add('hidden');
+                
+                alert(technicianId ? 'تم تعديل بيانات الفني بنجاح' : 'تم إضافة الفني بنجاح');
+            });
+
+            // عرض الفنيين في الجدول
+            function renderTechnicians() {
+                techniciansList.innerHTML = '';
+                
+                if (technicians.length === 0) {
+                    techniciansList.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-gray-500">
+                                لا يوجد فنيين مسجلين حتى الآن
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                technicians.forEach(tech => {
+                    const agreementValue = tech.agreementType === 'percentage' 
+                        ? `${tech.percentage}%` 
+                        : `${tech.salary} د.ل`;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${tech.fullName}</td>
+                        <td>${tech.phone}</td>
+                        <td>${tech.nationality}</td>
+                        <td>${tech.agreementType === 'percentage' ? 'نسبة' : 'راتب ثابت'}</td>
+                        <td>${agreementValue}</td>
+                        <td>
+                            <button class="edit-btn text-blue-600 hover:text-blue-800 ml-2" data-id="${tech.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn text-red-600 hover:text-red-800" data-id="${tech.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    techniciansList.appendChild(row);
+                });
+                
+                // إضافة مستمعي الأحداث لأزرار التعديل والحذف
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        editTechnician(id);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        deleteTechnician(id);
+                    });
+                });
+            }
+            
+            // تعديل الفني
+            function editTechnician(id) {
+                const technician = technicians.find(tech => tech.id === id);
+                if (!technician) return;
+                
+                formTitle.textContent = 'تعديل بيانات الفني';
+                document.getElementById('technicianId').value = technician.id;
+                document.getElementById('fullName').value = technician.fullName;
+                document.getElementById('phone').value = technician.phone;
+                document.getElementById('nationality').value = technician.nationality;
+                document.getElementById('agreementType').value = technician.agreementType;
+                
+                if (technician.agreementType === 'percentage') {
+                    document.getElementById('percentage').value = technician.percentage;
+                } else {
+                    document.getElementById('salary').value = technician.salary;
+                }
+                
+                agreementType.dispatchEvent(new Event('change'));
+                technicianFormModal.classList.remove('hidden');
+            }
+            
+            // حذف الفني
+            function deleteTechnician(id) {
+                if (confirm('هل أنت متأكد من حذف هذا الفني؟')) {
+                    technicians = technicians.filter(tech => tech.id !== id);
+                    localStorage.setItem('technicians', JSON.stringify(technicians));
+                    renderTechnicians();
+                    alert('تم حذف الفني بنجاح');
+                }
+            }
+            
+            // التهيئة الأولية
+            renderTechnicians();
+        });
+    </script>
+</body>
+</html>
