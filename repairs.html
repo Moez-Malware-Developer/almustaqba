@@ -51,6 +51,13 @@
         .modal {
             background-color: rgba(0, 0, 0, 0.5);
         }
+        .status-filter-btn.active-filter {
+            background-color: #A20A0A;
+            color: white;
+        }
+        .status-filter-btn:not(.active-filter):hover {
+            background-color: #e5e7eb;
+        }
         @media print {
             body * {
                 visibility: hidden;
@@ -159,11 +166,17 @@
                     </div>
                     <div>
                         <label for="deviceType" class="block text-sm font-medium text-gray-700 mb-1">نوع الجهاز <span class="text-red-500">*</span></label>
-                        <input type="text" id="deviceType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                        <div class="relative">
+                            <input type="text" id="deviceType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                            <ul id="device-list" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+                        </div>
                     </div>
                     <div>
                         <label for="faultType" class="block text-sm font-medium text-gray-700 mb-1">نوع العطل <span class="text-red-500">*</span></label>
-                        <input type="text" id="faultType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                        <div class="relative">
+                            <input type="text" id="faultType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]" required>
+                            <ul id="malfunction-list" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+                        </div>
                     </div>
                     <div>
                         <label for="agreedPrice" class="block text-sm font-medium text-gray-700 mb-1">السعر المتفق عليه <span class="text-red-500">*</span></label>
@@ -211,7 +224,7 @@
                             </tr>
                         </thead>
                         <tbody id="receivedRepairsTableBody" class="bg-white divide-y divide-gray-200">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -228,6 +241,16 @@
                     <button id="scanQRBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
                         <i class="fas fa-qrcode ml-2"></i> مسح QR Code
                     </button>
+                </div>
+                <div class="flex flex-wrap items-center gap-4 mt-4">
+                    <label class="text-sm font-medium text-gray-700">تصفية حسب الحالة:</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="status-filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 active-filter bg-[#A20A0A] text-white" data-status="all">الكل</button>
+                        <button class="status-filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-200 text-gray-700 hover:bg-gray-300" data-status="استلام">مستلمة</button>
+                        <button class="status-filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-200 text-gray-700 hover:bg-gray-300" data-status="جاري الصيانة">قيد الصيانة</button>
+                        <button class="status-filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-200 text-gray-700 hover:bg-gray-300" data-status="تم الانتهاء">تم الانتهاء</button>
+                        <button class="status-filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-200 text-gray-700 hover:bg-gray-300" data-status="مرفوض">مرفوضة</button>
+                    </div>
                 </div>
             </div>
 
@@ -260,12 +283,12 @@
                             </tr>
                         </thead>
                         <tbody id="repairsTableBody" class="bg-white divide-y divide-gray-200">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
-        
+
         <div id="finish-repair-section" class="tab-content hidden bg-white rounded-lg shadow-md border border-gray-200 p-6">
             <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-2">إنهاء الصيانة</h2>
             <form id="finishRepairForm" class="space-y-6">
@@ -358,7 +381,7 @@
                     <label for="assignTechSelect" class="block text-sm font-medium text-gray-700 mb-1">اختيار فني</label>
                     <select id="assignTechSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]">
                         <option value="">اختر فني</option>
-                        </select>
+                    </select>
                 </div>
                 <div class="flex justify-center pt-4">
                     <button id="confirmAssignBtn" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
@@ -369,6 +392,40 @@
         </div>
     </div>
     
+    <div id="edit-repair-modal" class="modal fixed inset-0 flex items-center justify-center z-[100] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto p-6 relative">
+            <button id="closeEditRepairModal" class="absolute top-4 left-4 text-gray-500 hover:text-gray-700 text-2xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-2xl font-bold text-gray-700 mb-4 text-center">تعديل بيانات الجهاز</h3>
+            <form id="editRepairForm" class="space-y-4">
+                <div>
+                    <label for="editDeviceType" class="block text-sm font-medium text-gray-700 mb-1">نوع الجهاز</label>
+                    <div class="relative">
+                        <input type="text" id="editDeviceType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]">
+                        <ul id="edit-device-list" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+                    </div>
+                </div>
+                <div>
+                    <label for="editFaultType" class="block text-sm font-medium text-gray-700 mb-1">نوع العطل</label>
+                    <div class="relative">
+                        <input type="text" id="editFaultType" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]">
+                        <ul id="edit-malfunction-list" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+                    </div>
+                </div>
+                <div>
+                    <label for="editTechnician" class="block text-sm font-medium text-gray-700 mb-1">الفني</label>
+                    <select id="editTechnician" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-input focus:outline-none focus:border-[#A20A0A]"></select>
+                </div>
+                <div class="flex justify-center pt-4">
+                    <button type="submit" class="bg-[#A20A0A] text-white px-6 py-2 rounded-lg hover:bg-[#C02020] transition-colors duration-200">
+                        <i class="fas fa-save ml-2"></i> حفظ التغييرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
@@ -397,6 +454,15 @@
             const closeAssignTechModalBtn = document.getElementById('closeAssignTechModal');
             const assignTechSelect = document.getElementById('assignTechSelect');
             const confirmAssignBtn = document.getElementById('confirmAssignBtn');
+            
+            const editRepairModal = document.getElementById('edit-repair-modal');
+            const closeEditRepairModalBtn = document.getElementById('closeEditRepairModal');
+            const editRepairForm = document.getElementById('editRepairForm');
+            const editDeviceTypeInput = document.getElementById('editDeviceType');
+            const editFaultTypeInput = document.getElementById('editFaultType');
+            const editTechnicianSelect = document.getElementById('editTechnician');
+            
+            const statusFilterButtons = document.querySelectorAll('.status-filter-btn');
 
             let currentRepairId = null;
 
@@ -431,10 +497,64 @@
                 });
             });
 
+            // Autocomplete functionality
+            function setupAutocomplete(inputId, listId, storageKey) {
+                const input = document.getElementById(inputId);
+                const list = document.getElementById(listId);
+                let data = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+                function saveItem(item) {
+                    if (item && !data.includes(item)) {
+                        data.push(item);
+                        localStorage.setItem(storageKey, JSON.stringify(data));
+                    }
+                }
+                function displayList(query) {
+                    list.innerHTML = '';
+                    const filteredData = data.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+                    if (filteredData.length > 0) {
+                        filteredData.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            li.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                            li.onclick = () => {
+                                input.value = item;
+                                list.classList.add('hidden');
+                            };
+                            list.appendChild(li);
+                        });
+                        list.classList.remove('hidden');
+                    } else {
+                        list.classList.add('hidden');
+                    }
+                }
+                input.addEventListener('focus', () => {
+                    if (!input.value) displayList('');
+                });
+                input.addEventListener('input', (e) => {
+                    const query = e.target.value;
+                    if (query) {
+                        displayList(query);
+                    } else {
+                        displayList('');
+                    }
+                });
+                document.addEventListener('click', (e) => {
+                    if (!input.contains(e.target) && !list.contains(e.target)) {
+                        list.classList.add('hidden');
+                    }
+                });
+                return { saveItem };
+            }
+            const deviceAutocomplete = setupAutocomplete('deviceType', 'device-list', 'savedDevices');
+            const malfunctionAutocomplete = setupAutocomplete('faultType', 'malfunction-list', 'savedMalfunctions');
+            const editDeviceAutocomplete = setupAutocomplete('editDeviceType', 'edit-device-list', 'savedDevices');
+            const editMalfunctionAutocomplete = setupAutocomplete('editFaultType', 'edit-malfunction-list', 'savedMalfunctions');
+
             // Form submission for new repair
             newRepairForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-
+                
                 const newRepair = {
                     id: Date.now(),
                     customerName: document.getElementById('customerName').value,
@@ -443,22 +563,61 @@
                     faultType: document.getElementById('faultType').value,
                     agreedPrice: parseFloat(document.getElementById('agreedPrice').value),
                     advancePayment: parseFloat(document.getElementById('advancePayment').value),
-                    technicianId: null, // Initially no technician assigned
+                    technicianId: null,
                     additionalNotes: document.getElementById('additionalNotes').value,
                     status: 'استلام',
-                    date: new Date().toLocaleDateString('ar-SA')
+                    date: new Date().toISOString().slice(0, 10) // YYYY-MM-DD format
                 };
 
                 saveRepair(newRepair);
+                deviceAutocomplete.saveItem(newRepair.deviceType);
+                malfunctionAutocomplete.saveItem(newRepair.faultType);
                 newRepairForm.reset();
                 
                 generateReceipt(newRepair);
-                loadRepairs(); // Refresh the repair lists
+                loadRepairs();
+            });
+
+            // Handle finishing a repair
+            finishRepairForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const repairId = parseInt(finishRepairForm.dataset.repairId);
+                let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                const repairIndex = repairs.findIndex(r => r.id === repairId);
+                
+                if (repairIndex > -1) {
+                    const partsCost = parseFloat(document.getElementById('partsCost').value);
+                    const repair = repairs[repairIndex];
+                    const profit = repair.agreedPrice - repair.advancePayment - partsCost;
+                    
+                    repair.status = 'تم التسليم';
+                    repair.partsCost = partsCost;
+                    repair.profit = profit;
+                    
+                    localStorage.setItem('repairs', JSON.stringify(repairs));
+                    alert('تم إنهاء الصيانة بنجاح وتسليم الجهاز للزبون.');
+                    finishRepairForm.reset();
+                    document.querySelector('.tab-button[data-tab="track-repair"]').click();
+                }
+            });
+
+            // Cancel finish repair
+            cancelFinishBtn.addEventListener('click', () => {
+                finishRepairForm.reset();
+                document.querySelector('.tab-button[data-tab="track-repair"]').click();
+            });
+
+            // Calculate profit
+            document.getElementById('partsCost').addEventListener('input', () => {
+                const agreedPrice = parseFloat(document.getElementById('finishAgreedPrice').value) || 0;
+                const advancePayment = parseFloat(document.getElementById('finishAdvancePayment').value) || 0;
+                const partsCost = parseFloat(document.getElementById('partsCost').value) || 0;
+                const profit = (agreedPrice - advancePayment) - partsCost;
+                document.getElementById('profit').value = profit.toFixed(2);
             });
 
             // Generate and display receipt with QR code
             function generateReceipt(repair) {
-                // Load shop settings for the receipt header
                 const shopSettings = JSON.parse(localStorage.getItem('shopSettings')) || {
                     shopName: "إدارة الورش",
                     primaryPhone: "غير محدد",
@@ -469,7 +628,6 @@
                 document.getElementById('shop-phone').textContent = shopSettings.primaryPhone;
                 document.getElementById('shop-address').textContent = shopSettings.shopAddress;
                 
-                // Populate receipt details
                 document.getElementById('receipt-id').textContent = repair.id;
                 document.getElementById('receipt-date').textContent = repair.date;
                 document.getElementById('receipt-customer-name').textContent = repair.customerName;
@@ -481,10 +639,9 @@
                 const remaining = repair.agreedPrice - repair.advancePayment;
                 document.getElementById('receipt-remaining-amount').textContent = remaining > 0 ? remaining : 0;
                 
-                // Generate QR code
                 qrcodeContainer.innerHTML = '';
                 new QRCode(qrcodeContainer, {
-                    text: `http://localhost/track?id=${repair.id}`, // Example URL for tracking
+                    text: `https://your-website.com/track?id=${repair.id}`,
                     width: 128,
                     height: 128
                 });
@@ -498,7 +655,6 @@
             closeReceiptBtnInModal.addEventListener('click', () => {
                 receiptModal.classList.add('hidden');
             });
-
             printReceiptBtnInModal.addEventListener('click', () => {
                 window.print();
             });
@@ -510,8 +666,8 @@
                 localStorage.setItem('repairs', JSON.stringify(repairs));
             }
 
-            // Load and display repairs in the table
-            function loadRepairs(filter = '') {
+            // Load and display repairs in the table with filters
+            function loadRepairs(filter = '', statusFilter = 'all') {
                 const repairs = JSON.parse(localStorage.getItem('repairs')) || [];
                 receivedRepairsTableBody.innerHTML = '';
                 repairsTableBody.innerHTML = '';
@@ -522,16 +678,19 @@
                     return tech ? tech.name : 'غير محدد';
                 };
 
-                const filteredRepairs = repairs.filter(repair => 
-                    repair.customerName.includes(filter) ||
-                    repair.customerPhone.includes(filter) ||
-                    repair.id.toString().includes(filter)
-                );
-
-                const receivedRepairs = filteredRepairs.filter(repair => repair.status === 'استلام');
-                const inProgressRepairs = filteredRepairs.filter(repair => repair.status !== 'استلام');
-
+                const filteredRepairs = repairs.filter(repair => {
+                    const matchesFilter = 
+                        repair.customerName.includes(filter) ||
+                        repair.customerPhone.includes(filter) ||
+                        repair.id.toString().includes(filter);
+                    
+                    const matchesStatus = (statusFilter === 'all' || repair.status === statusFilter);
+                    
+                    return matchesFilter && matchesStatus;
+                });
+                
                 // Populate Received Devices table
+                const receivedRepairs = filteredRepairs.filter(repair => repair.status === 'استلام');
                 if (receivedRepairs.length === 0) {
                     receivedRepairsTableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">لا توجد أجهزة مستلمة.</td></tr>`;
                 } else {
@@ -552,161 +711,228 @@
                     });
                 }
                 
-                // Populate In-Progress & Finished Repairs table
-                if (inProgressRepairs.length === 0) {
+                // Populate Tracking Table
+                const trackRepairs = filteredRepairs.filter(repair => repair.status !== 'استلام');
+                if (trackRepairs.length === 0) {
                     repairsTableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">لا توجد إصلاحات قيد المتابعة.</td></tr>`;
                 } else {
-                    inProgressRepairs.forEach(repair => {
+                    trackRepairs.forEach(repair => {
                         const row = document.createElement('tr');
                         row.className = 'hover:bg-gray-50 transition-colors duration-150';
-                        let statusColor = '';
+                        let statusClass = '';
+                        let actionsHtml = '';
                         switch (repair.status) {
                             case 'جاري الصيانة':
-                                statusColor = 'bg-yellow-200 text-yellow-800';
+                                statusClass = 'bg-yellow-100 text-yellow-800';
+                                actionsHtml = `
+                                    <div class="flex items-center gap-2">
+                                        <button data-id="${repair.id}" data-status="تم الانتهاء" class="change-status-btn bg-green-500 text-white px-3 py-1 rounded-full text-sm hover:bg-green-600">
+                                            تم
+                                        </button>
+                                        <button data-id="${repair.id}" data-status="مرفوض" class="change-status-btn bg-red-500 text-white px-3 py-1 rounded-full text-sm hover:bg-red-600">
+                                            مرفوض
+                                        </button>
+                                        <button data-id="${repair.id}" class="edit-repair-btn bg-gray-500 text-white px-3 py-1 rounded-full text-sm hover:bg-gray-600">
+                                            تعديل
+                                        </button>
+                                    </div>
+                                `;
                                 break;
                             case 'تم الانتهاء':
-                                statusColor = 'bg-green-200 text-green-800';
+                                statusClass = 'bg-green-100 text-green-800';
+                                actionsHtml = `
+                                    <div class="flex items-center gap-2">
+                                        <button data-id="${repair.id}" data-status="جاري الصيانة" class="change-status-btn bg-yellow-500 text-white px-3 py-1 rounded-full text-sm hover:bg-yellow-600">
+                                            إعادة صيانة
+                                        </button>
+                                        <button data-id="${repair.id}" data-status="تم التسليم" class="change-status-btn bg-[#A20A0A] text-white px-3 py-1 rounded-full text-sm hover:bg-[#C02020]">
+                                            تسليم
+                                        </button>
+                                    </div>
+                                `;
+                                break;
+                            case 'مرفوض':
+                                statusClass = 'bg-red-100 text-red-800';
+                                actionsHtml = `
+                                    <div class="flex items-center gap-2">
+                                        <button data-id="${repair.id}" data-status="جاري الصيانة" class="change-status-btn bg-yellow-500 text-white px-3 py-1 rounded-full text-sm hover:bg-yellow-600">
+                                            إعادة صيانة
+                                        </button>
+                                    </div>
+                                `;
+                                break;
+                            case 'تم التسليم':
+                                statusClass = 'bg-gray-100 text-gray-800';
+                                actionsHtml = `
+                                    <span class="text-sm text-gray-500">تم التسليم</span>
+                                `;
                                 break;
                         }
+                        const formattedDate = new Date(repair.date).toLocaleDateString('en-CA');
                         row.innerHTML = `
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.id}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${repair.customerName}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${getTechnicianName(repair.technicianId)}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.deviceType}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">${repair.status}</span>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                                    ${repair.status}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${repair.date}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                <div class="flex items-center justify-center space-x-2 space-x-reverse">
-                                    ${repair.status === 'جاري الصيانة' ? `
-                                    <button data-id="${repair.id}" data-status="تم الانتهاء" class="finish-btn text-green-600 hover:text-green-900 transition-colors duration-150" title="إنهاء الصيانة">
-                                        <i class="fas fa-check-circle text-lg"></i>
-                                    </button>
-                                    ` : `
-                                    <span class="text-gray-400" title="تم إنهاء الصيانة"><i class="fas fa-check-circle text-lg"></i></span>
-                                    `}
-                                </div>
-                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">${actionsHtml}</td>
                         `;
                         repairsTableBody.appendChild(row);
                     });
                 }
-                attachButtonListeners();
             }
 
-            // Load technicians for the dropdowns
+            // Handle table actions
+            document.getElementById('receivedRepairsTableBody').addEventListener('click', (e) => {
+                if (e.target.classList.contains('assign-tech-btn')) {
+                    currentRepairId = parseInt(e.target.dataset.id);
+                    assignTechModal.classList.remove('hidden');
+                }
+            });
+
+            document.getElementById('repairsTableBody').addEventListener('click', (e) => {
+                if (e.target.classList.contains('change-status-btn')) {
+                    const repairId = parseInt(e.target.dataset.id);
+                    const newStatus = e.target.dataset.status;
+                    changeRepairStatus(repairId, newStatus);
+                }
+                if (e.target.classList.contains('edit-repair-btn')) {
+                    currentRepairId = parseInt(e.target.dataset.id);
+                    const repair = getRepairById(currentRepairId);
+                    if (repair) {
+                        editDeviceTypeInput.value = repair.deviceType;
+                        editFaultTypeInput.value = repair.faultType;
+                        editTechnicianSelect.value = repair.technicianId;
+                        editRepairModal.classList.remove('hidden');
+                    }
+                }
+            });
+
+            // Handle search input
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value;
+                const activeStatus = document.querySelector('.status-filter-btn.active-filter').dataset.status;
+                loadRepairs(query, activeStatus);
+            });
+
+            // Handle status filter buttons
+            statusFilterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    statusFilterButtons.forEach(btn => {
+                        btn.classList.remove('active-filter', 'bg-[#A20A0A]', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    button.classList.add('active-filter', 'bg-[#A20A0A]', 'text-white');
+                    button.classList.remove('bg-gray-200', 'text-gray-700');
+                    const status = button.dataset.status;
+                    loadRepairs(searchInput.value, status);
+                });
+            });
+
+            // Get a single repair by ID
+            function getRepairById(id) {
+                const repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                return repairs.find(r => r.id === id);
+            }
+            
+            // Function to update the repair status
+            function changeRepairStatus(id, newStatus) {
+                if (newStatus === 'تم الانتهاء') {
+                    if (!confirm('هل أنت متأكد من إتمام صيانة هذا الجهاز؟ سيتم إعداد الجهاز للتسليم للزبون.')) {
+                        return; // Stop if user cancels
+                    }
+                }
+
+                if (newStatus === 'تم التسليم') {
+                    const repair = getRepairById(id);
+                    document.querySelector('.tab-button[data-tab="finish-repair"]').click();
+                    document.getElementById('finishRepairForm').dataset.repairId = id;
+                    document.getElementById('finishCustomerName').value = repair.customerName;
+                    document.getElementById('finishDeviceType').value = repair.deviceType;
+                    document.getElementById('finishAgreedPrice').value = repair.agreedPrice;
+                    document.getElementById('finishAdvancePayment').value = repair.advancePayment;
+                    // Trigger profit calculation
+                    document.getElementById('partsCost').dispatchEvent(new Event('input'));
+                    return; // Stop further execution here
+                }
+
+                let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                const repairIndex = repairs.findIndex(r => r.id === id);
+
+                if (repairIndex > -1) {
+                    repairs[repairIndex].status = newStatus;
+                    localStorage.setItem('repairs', JSON.stringify(repairs));
+                    loadRepairs(searchInput.value, document.querySelector('.status-filter-btn.active-filter').dataset.status);
+                    alert(`تم تحديث حالة الجهاز رقم ${id} إلى: ${newStatus}`);
+                }
+            }
+            
+            // Assign technician functionality
+            closeAssignTechModalBtn.addEventListener('click', () => {
+                assignTechModal.classList.add('hidden');
+            });
+
+            confirmAssignBtn.addEventListener('click', () => {
+                const technicianId = assignTechSelect.value;
+                if (technicianId) {
+                    let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
+                    const repairIndex = repairs.findIndex(r => r.id === currentRepairId);
+                    if (repairIndex > -1) {
+                        repairs[repairIndex].technicianId = parseInt(technicianId);
+                        repairs[repairIndex].status = 'جاري الصيانة';
+                        localStorage.setItem('repairs', JSON.stringify(repairs));
+                        alert('تم تعيين الفني بنجاح!');
+                        assignTechModal.classList.add('hidden');
+                        loadRepairs();
+                    }
+                } else {
+                    alert('الرجاء اختيار فني.');
+                }
+            });
+
+            // Load technicians into the select menus
             function loadTechnicians() {
                 const technicians = JSON.parse(localStorage.getItem('technicians')) || [];
                 assignTechSelect.innerHTML = '<option value="">اختر فني</option>';
+                editTechnicianSelect.innerHTML = '<option value="">اختر فني</option>';
                 technicians.forEach(tech => {
                     const option = document.createElement('option');
                     option.value = tech.id;
                     option.textContent = tech.name;
                     assignTechSelect.appendChild(option);
+                    editTechnicianSelect.appendChild(option.cloneNode(true));
                 });
             }
 
-            // Handle button clicks for assigning tech and finishing repair
-            function attachButtonListeners() {
-                document.querySelectorAll('.assign-tech-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        currentRepairId = parseInt(e.currentTarget.dataset.id);
-                        assignTechModal.classList.remove('hidden');
-                    });
-                });
-
-                document.querySelectorAll('.finish-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        currentRepairId = parseInt(e.currentTarget.dataset.id);
-                        let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
-                        const repair = repairs.find(r => r.id === currentRepairId);
-                        
-                        document.getElementById('finishCustomerName').value = repair.customerName;
-                        document.getElementById('finishDeviceType').value = repair.deviceType;
-                        document.getElementById('finishAgreedPrice').value = repair.agreedPrice;
-                        document.getElementById('finishAdvancePayment').value = repair.advancePayment;
-                        document.querySelector('[data-tab="finish-repair"]').click();
-                        calculateProfit();
-                    });
-                });
-            }
-
-            // Assign technician from modal
-            confirmAssignBtn.addEventListener('click', () => {
-                const technicianId = assignTechSelect.value;
-                if (!technicianId) {
-                    alert('الرجاء اختيار فني أولاً.');
-                    return;
-                }
-
-                let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
-                const repairIndex = repairs.findIndex(r => r.id === currentRepairId);
-
-                if (repairIndex > -1) {
-                    repairs[repairIndex].technicianId = technicianId;
-                    repairs[repairIndex].status = 'جاري الصيانة';
-                    localStorage.setItem('repairs', JSON.stringify(repairs));
-                    assignTechModal.classList.add('hidden');
-                    loadRepairs();
-                    document.querySelector('[data-tab="track-repair"]').click();
-                }
+            // Edit repair functionality
+            closeEditRepairModalBtn.addEventListener('click', () => {
+                editRepairModal.classList.add('hidden');
             });
-
-            closeAssignTechModalBtn.addEventListener('click', () => {
-                assignTechModal.classList.add('hidden');
-            });
-
-            // Search functionality
-            searchInput.addEventListener('input', (e) => {
-                const filterValue = e.target.value;
-                loadRepairs(filterValue);
-            });
-
-            // Finish Repair Form Logic
-            function calculateProfit() {
-                const agreedPrice = parseFloat(document.getElementById('finishAgreedPrice').value) || 0;
-                const partsCost = parseFloat(document.getElementById('partsCost').value) || 0;
-                const profit = agreedPrice - partsCost;
-                document.getElementById('profit').value = profit.toFixed(2) + ' د.ل.';
-            }
-
-            document.getElementById('partsCost').addEventListener('input', calculateProfit);
             
-            finishRepairForm.addEventListener('submit', (e) => {
+            editRepairForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                
-                const partsCost = parseFloat(document.getElementById('partsCost').value);
-                const agreedPrice = parseFloat(document.getElementById('finishAgreedPrice').value);
-                
-                if (isNaN(partsCost) || isNaN(agreedPrice)) {
-                    alert('الرجاء إدخال أرقام صحيحة لتكلفة القطع.');
-                    return;
-                }
-                
+                const updatedDeviceType = editDeviceTypeInput.value;
+                const updatedFaultType = editFaultTypeInput.value;
+                const updatedTechnicianId = editTechnicianSelect.value;
+
                 let repairs = JSON.parse(localStorage.getItem('repairs')) || [];
                 const repairIndex = repairs.findIndex(r => r.id === currentRepairId);
                 
                 if (repairIndex > -1) {
-                    repairs[repairIndex].status = 'تم الانتهاء';
-                    repairs[repairIndex].partsCost = partsCost;
-                    repairs[repairIndex].profit = agreedPrice - partsCost;
+                    repairs[repairIndex].deviceType = updatedDeviceType;
+                    repairs[repairIndex].faultType = updatedFaultType;
+                    repairs[repairIndex].technicianId = parseInt(updatedTechnicianId);
                     localStorage.setItem('repairs', JSON.stringify(repairs));
-                    
-                    alert('تم إنهاء الصيانة وحساب الأرباح بنجاح!');
-                    finishRepairForm.reset();
-                    loadRepairs(); // Refresh the lists
-                    document.querySelector('[data-tab="track-repair"]').click();
+                    alert('تم حفظ التغييرات بنجاح!');
+                    editRepairModal.classList.add('hidden');
+                    loadRepairs(searchInput.value, document.querySelector('.status-filter-btn.active-filter').dataset.status);
                 }
             });
-            
-            cancelFinishBtn.addEventListener('click', () => {
-                finishRepairForm.reset();
-                document.querySelector('[data-tab="track-repair"]').click();
-            });
-
-            // Initial load of repairs
-            loadRepairs();
         });
     </script>
 </body>
